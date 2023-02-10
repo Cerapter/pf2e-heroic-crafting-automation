@@ -1,0 +1,41 @@
+{
+    "id": "pf2e-heroic-crafting",
+    "title": "PF2e Heroic Crafting",
+    "description": "Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio.",
+    "version": "1.0",
+    "authors": [
+        {
+            "name": "Cerapter",
+            "discord": "Cerapter#2415"
+        }
+    ],
+    "compatibility": {
+        "minimum": "10",
+        "verified": "10.291"
+    },
+    "esmodules": [
+        "scripts/config.ts"
+    ],
+    "relationships": {
+        "systems": [
+            {
+                "id": "pf2e",
+                "type": "system",
+                "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
+                "compatibility": {
+                    "minimum": "4.7.4"
+                }
+            }
+        ]
+    },
+    "packs": [
+        {
+            "label": "Heroic Crafting - Macros",
+            "name": "heroic-crafting-macros",
+            "system": "pf2e",
+            "path": "packs/macros.db",
+            "type": "Macro",
+            "private": false
+        }
+    ]
+}
