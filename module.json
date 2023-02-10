@@ -14,7 +14,7 @@
         "verified": "10.291"
     },
     "esmodules": [
-        "scripts/config.ts"
+        "scripts/config.js"
     ],
     "relationships": {
         "systems": [
