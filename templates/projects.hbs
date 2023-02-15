@@ -1,0 +1,41 @@
+<li class="known-formulas item-container" data-container-type="heroicCraftingProjects">
+    <div class="action-header">
+        <h3 class="item-name hide-container-toggle title">
+            Projects (Heroic Crafting)
+        </h3>
+    </div>
+    <ol class="directory-list item-list formula-list">
+        <li class="formula-level-header formula-header">
+            <div class="level-name">
+                <h3>Name</h3>
+            </div>
+
+            <div class="level-name aa-level">
+                <h3>Quantity</h3>
+            </div>
+        </li>
+        {{#each projects as |project|}}
+            <li class="item formula-item" data-formula-lvl="{{lvl}}" data-item-id="{{project.uuid}}" data-is-formula="true">
+                <div class="item-name rollable">
+                    <div class="item-image">
+                        <img class="item-icon" src="{{project.img}}" alt="{{project.name}}">
+                    </div>
+                    <h4>{{project.name}}</h4>
+                </div>
+                <div class="formula-quantity">
+                    <input type="number" class="formula-number" data-action="enter-quantity" value="{{project.batch}}" readonly />
+                </div>
+            </li>
+            <div class="heroic-crafting-project">
+                <span class="heroic-crafting-project-bar" style="width:{{project.progress}}%"></span>
+                <span class="heroic-crafting-project-bar-label">Completion: {{project.currentlyDone}} / {{project.cost}}</span>
+            </div>
+        {{else}}
+            {{#if @root.options.editable}}
+                <li class="formula-header empty">
+                    <h4>Empty</h4>
+                </li>
+            {{/if}}
+        {{/each}}
+    </ol>
+</li>
