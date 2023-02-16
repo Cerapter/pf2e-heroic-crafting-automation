@@ -22,8 +22,6 @@ Hooks.on('renderCharacterSheetPF2e', async (data, html) => {
         const craftingEntries = html.find('.craftingEntry-list');
         const projects = await getProjectsToDisplay(data.actor);
 
-        console.log(projects);
-
         const template = await renderTemplate(`modules/${MODULE_NAME}/templates/projects.hbs`, { projects });
         craftingEntries.append(template);
     }

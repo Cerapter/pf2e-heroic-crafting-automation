@@ -5,7 +5,8 @@ export async function beginAProject(crafterActor, itemID) {
 
     const newProjects = [
         {
-            UUID:
+            ID: randomID(),
+            ItemUUID:
                 "Compendium.pf2e.equipment-srd.6KWYmeRMxsQfWhhJ",
             progressInCopper: 0,
             batchSize: 1
@@ -19,13 +20,13 @@ export async function getProjectsToDisplay(actor) {
     const projects = actor.getFlag(MODULE_NAME, 'projects') ?? [];
 
     const projectItems = await Promise.all(projects.map(async (project) => {
-        const projectItem = await fromUuid(project.UUID);
+        const projectItem = await fromUuid(project.ItemUUID);
         const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
         const currentlyDone = new game.pf2e.Coins({ cp: project.progressInCopper });
         const progress = project.progressInCopper / cost.copperValue * 100;
 
         return {
-            uuid: project.UUID,
+            uuid: project.ItemUUID,
             img: projectItem.img,
             name: projectItem.name,
             batch: project.batchSize,
