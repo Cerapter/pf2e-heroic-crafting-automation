@@ -6,16 +6,18 @@
     </div>
     <ol class="directory-list item-list formula-list">
         <li class="formula-level-header formula-header">
-            <div class="level-name">
+            <div class="level-name flexrow">
                 <h3>Name</h3>
             </div>
-
-            <div class="level-name aa-level">
-                <h3>Quantity</h3>
+            <div class="formula-quantity-header">
+                Quantity
+            </div>
+            <div class="formula-quantity-header">
+                Controls
             </div>
         </li>
         {{#each projects as |project|}}
-            <li class="item formula-item" data-formula-lvl="{{lvl}}" data-item-id="{{project.uuid}}" data-is-formula="true">
+            <li class="item formula-item" data-formula-lvl="{{lvl}}" data-project-id="{{project.projectUuid}}" data-item-id="{{project.itemUuid}}" data-is-formula="true">
                 <div class="item-name rollable">
                     <div class="item-image">
                         <img class="item-icon" src="{{project.img}}" alt="{{project.name}}">
@@ -25,13 +27,19 @@
                 <div class="formula-quantity">
                     <input type="number" class="formula-number" data-action="enter-quantity" value="{{project.batch}}" readonly />
                 </div>
+                {{#if @root.editable}}
+                    <div class="item-controls heroic-crafting-project-controls">
+                        <a class="item-control project-edit" title="{{localize "PF2E.EditItemTitle"}}"><i class="fas fa-fw fa-edit"></i></a>
+                        <a class="item-control project-delete" title="{{localize "PF2E.DeleteItemTitle"}}"><i class="fas fa-fw fa-trash"></i></a>
+                    </div>
+                {{/if}}
             </li>
             <div class="heroic-crafting-project">
                 <span class="heroic-crafting-project-bar" style="width:{{project.progress}}%"></span>
                 <span class="heroic-crafting-project-bar-label">Completion: {{project.currentlyDone}} / {{project.cost}}</span>
             </div>
         {{else}}
-            {{#if @root.options.editable}}
+            {{#if @root.editable}}
                 <li class="formula-header empty">
                     <h4>Empty</h4>
                 </li>

@@ -1,23 +1,33 @@
 import { MODULE_NAME } from "./constants.js";
 
-export async function beginAProject(crafterActor, itemID) {
+export async function beginAProject(crafterActor, itemDetails) {
+    // TODO: Put a dialog up to ask how much we wanna commit to it
+    if (!itemDetails.UUID || itemDetails.UUID === "") {
+        console.error("[HEROIC CRAFTING] Missing UUID when beginning a project!");
+        return;
+    }
+
     let actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
 
     const newProjects = [
         {
             ID: randomID(),
-            ItemUUID:
-                "Compendium.pf2e.equipment-srd.6KWYmeRMxsQfWhhJ",
+            ItemUUID: itemDetails.UUID,
             progressInCopper: 0,
-            batchSize: 1
+            batchSize: itemDetails.batchSize || 1
         }
     ];
 
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 
-export async function getProjectsToDisplay(actor) {
-    const projects = actor.getFlag(MODULE_NAME, 'projects') ?? [];
+export async function abandonProject(crafterActor, projectUUID) {
+    const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
+    await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.filter(project => project.ID !== projectUUID) });
+}
+
+export async function getProjectsToDisplay(crafterActor) {
+    const projects = crafterActor.getFlag(MODULE_NAME, 'projects') ?? [];
 
     const projectItems = await Promise.all(projects.map(async (project) => {
         const projectItem = await fromUuid(project.ItemUUID);
@@ -26,7 +36,8 @@ export async function getProjectsToDisplay(actor) {
         const progress = project.progressInCopper / cost.copperValue * 100;
 
         return {
-            uuid: project.ItemUUID,
+            projectUuid: project.ID,
+            itemUuid: project.ItemUUID,
             img: projectItem.img,
             name: projectItem.name,
             batch: project.batchSize,
