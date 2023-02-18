@@ -29,8 +29,8 @@
                 </div>
                 {{#if @root.editable}}
                     <div class="item-controls heroic-crafting-project-controls">
-                        <a class="item-control project-edit" title="{{localize "PF2E.EditItemTitle"}}"><i class="fas fa-fw fa-edit"></i></a>
-                        <a class="item-control project-delete" title="{{localize "PF2E.DeleteItemTitle"}}"><i class="fas fa-fw fa-trash"></i></a>
+                        <a class="item-control" title="{{localize "PF2E.CraftItemTitle"}}" data-action="project-craft"><i class="fa-solid fa-fw fa-hammer"></i></a>
+                        <a class="item-control" title="{{localize "PF2E.DeleteItemTitle"}}" data-action="project-delete"><i class="fas fa-fw fa-trash"></i></a>
                     </div>
                 {{/if}}
             </li>

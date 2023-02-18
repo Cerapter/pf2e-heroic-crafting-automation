@@ -1,5 +1,5 @@
 import { MODULE_NAME } from "./constants.js";
-import { projectBeginDialog } from "./dialog.js";
+import { projectBeginDialog, projectCraftDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
@@ -14,8 +14,9 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
     } else {
         dialogResult = { startingProgress: 0 };
     }
+    console.log(dialogResult);
 
-    if (!dialogResult.startingProgress) {
+    if (typeof dialogResult.startingProgress === "undefined") {
         return;
     }
 
@@ -38,6 +39,47 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
     await crafterActor.inventory.removeCoins({ cp: dialogResult.startingProgress });
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
+
+export async function craftAProject(crafterActor, itemDetails, skipDialog = true) {
+    if (!itemDetails.UUID || itemDetails.UUID === "") {
+        console.error("[HEROIC CRAFTING] Missing Item UUID when crafting a project!");
+        return;
+    }
+    if (!itemDetails.projectUUID || itemDetails.projectUUID === "") {
+        console.error("[HEROIC CRAFTING] Missing Project UUID when crafting a project!");
+        return;
+    }
+
+    let dialogResult = {};
+    if (!skipDialog) {
+        dialogResult = await projectCraftDialog(crafterActor, itemDetails);
+    } else {
+        //dialogResult = {};
+    }
+
+    // TODO: Finish
+    return;
+
+    if (crafterActor.inventory.coins.copperValue < dialogResult.startingProgress) {
+        ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
+        return;
+    }
+
+    let actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
+
+    const newProjects = [
+        {
+            ID: randomID(),
+            ItemUUID: itemDetails.UUID,
+            progressInCopper: dialogResult.startingProgress,
+            batchSize: itemDetails.batchSize || 1
+        }
+    ];
+
+    await crafterActor.inventory.removeCoins({ cp: dialogResult.startingProgress });
+    await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
+};
+
 
 export async function abandonProject(crafterActor, projectUUID) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];

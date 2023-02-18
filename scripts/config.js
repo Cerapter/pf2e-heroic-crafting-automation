@@ -1,5 +1,5 @@
 import { HeroicCraftingHourlySpendingLimit, spendingLimit, MODULE_NAME } from "./constants.js";
-import { beginAProject, abandonProject, getProjectsToDisplay } from "./crafting.js";
+import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay } from "./crafting.js";
 
 Hooks.on(
     "init",
@@ -46,10 +46,21 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         // Add functionality to Heroic Crafting project buttons
         const projectControls = craftingTab.find(".heroic-crafting-project-controls");
 
-        projectControls.find(".project-delete").on("click", async (event) => {
+        projectControls.find("a[data-action=project-delete]").on("click", async (event) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
 
             await abandonProject(data.actor, UUID);
+        });
+
+        projectControls.find("a[data-action=project-craft]").on("click", async (event) => {
+            const projectUUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
+            const itemUUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
+            const itemDetails = {
+                UUID: itemUUID,
+                projectUUID
+            };
+
+            await craftAProject(data.actor, itemDetails, false);
         });
     }
 })

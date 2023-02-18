@@ -1,3 +1,5 @@
+import { normaliseCoins } from "./coins.js";
+
 export const MODULE_NAME = "pf2e-heroic-crafting";
 
 export const HeroicCraftingHourlySpendingLimit = [
@@ -13,11 +15,14 @@ export function spendingLimit(spendingLimitDuration, level) {
 
     switch (spendingLimitDuration) {
         case "Hour":
+        case "hour":
             return hourlyLimit;
         case "Day":
-            return hourlyLimit.scale(4);
+        case "day":
+            return normaliseCoins(hourlyLimit.scale(4).copperValue);
         case "Week":
-            return hourlyLimit.scale(20);
+        case "week":
+            return normaliseCoins(hourlyLimit.scale(20).copperValue);
         default:
             return new game.pf2e.Coins();
     }
