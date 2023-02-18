@@ -1,3 +1,5 @@
+import { subtractCoins } from "./coins.js";
+
 export async function projectBeginDialog(itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
@@ -12,10 +14,11 @@ export async function projectBeginDialog(itemDetails) {
                     Current project: <strong>${item.name}</strong>
                 </section>
                 <section>
-                    <span>Spending: </span>
-                    <strong class="current-spending">0 gp</strong> / <span>${maxCost}</span>
-                    <input type="range" id="spending-range" min="0" max="100" value="0">
+                    <span>Remaining spending: </span>
+                    <strong class="remaining-spending">${maxCost}</strong>
+                    <input type="text" id="spending-amount">
                 </section>
+                <br/>
             `,
         buttons: {
             ok: {
@@ -23,7 +26,7 @@ export async function projectBeginDialog(itemDetails) {
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
                     return {
-                        startingProgress: game.pf2e.Coins.fromString($(html).find(".current-spending").html()).copperValue
+                        startingProgress: game.pf2e.Coins.fromString($(html).find("#spending-amount")[0].value).copperValue
                     };
                 }
             },
@@ -35,10 +38,18 @@ export async function projectBeginDialog(itemDetails) {
         default: "cancel",
         render: ([content]) => {
             content
-                .querySelector("[id=spending-range]")
-                .addEventListener("change", (event) => {
-                    const curVal = maxCost.scale(event.target.value).scale(0.01);
-                    $(event.target).siblings(".current-spending").html(curVal.toString());
+                .querySelector("[id=spending-amount]")
+                .addEventListener("keyup", (event) => {
+                    const currentSpending = game.pf2e.Coins.fromString(event.target.value);
+                    const remainingSpending = subtractCoins(maxCost, currentSpending);
+
+                    if (remainingSpending.copperValue < 0) {
+                        $(event.target).parent().parent().siblings(".dialog-buttons").find(".ok").attr("disabled", "true");
+                        $(event.target).siblings(".remaining-spending").html("Overspending!");
+                    } else {
+                        $(event.target).parent().parent().siblings(".dialog-buttons").find(".ok").removeAttr("disabled");
+                        $(event.target).siblings(".remaining-spending").html(remainingSpending.toString());
+                    }
                 });
         },
     }, { width: 250 });

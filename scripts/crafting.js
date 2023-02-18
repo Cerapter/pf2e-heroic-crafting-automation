@@ -1,5 +1,6 @@
 import { MODULE_NAME } from "./constants.js";
 import { projectBeginDialog } from "./dialog.js";
+import { normaliseCoins } from "./coins.js";
 
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
@@ -41,20 +42,6 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
 export async function abandonProject(crafterActor, projectUUID) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.filter(project => project.ID !== projectUUID) });
-}
-
-function normaliseCoins(copperValue) {
-    const pp = Math.floor(copperValue / 1000);
-    const gp = Math.floor(copperValue / 100) - pp * 10;
-    const sp = Math.floor(copperValue / 10) - pp * 100 - gp * 10;
-    const cp = copperValue - pp * 1000 - gp * 100 - sp * 10;
-
-    return new game.pf2e.Coins({
-        pp,
-        gp,
-        sp,
-        cp
-    });
 }
 
 export async function getProjectsToDisplay(crafterActor) {
