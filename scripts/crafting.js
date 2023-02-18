@@ -14,8 +14,6 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
         dialogResult = { startingProgress: 0 };
     }
 
-    console.log(dialogResult);
-
     if (!dialogResult.startingProgress) {
         return;
     }
@@ -45,13 +43,27 @@ export async function abandonProject(crafterActor, projectUUID) {
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.filter(project => project.ID !== projectUUID) });
 }
 
+function normaliseCoins(copperValue) {
+    const pp = Math.floor(copperValue / 1000);
+    const gp = Math.floor(copperValue / 100) - pp * 10;
+    const sp = Math.floor(copperValue / 10) - pp * 100 - gp * 10;
+    const cp = copperValue - pp * 1000 - gp * 100 - sp * 10;
+
+    return new game.pf2e.Coins({
+        pp,
+        gp,
+        sp,
+        cp
+    });
+}
+
 export async function getProjectsToDisplay(crafterActor) {
     const projects = crafterActor.getFlag(MODULE_NAME, 'projects') ?? [];
 
     const projectItems = await Promise.all(projects.map(async (project) => {
         const projectItem = await fromUuid(project.ItemUUID);
         const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
-        const currentlyDone = new game.pf2e.Coins({ cp: project.progressInCopper });
+        const currentlyDone = normaliseCoins(project.progressInCopper);
         const progress = project.progressInCopper / cost.copperValue * 100;
 
         return {
