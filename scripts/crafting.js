@@ -1,9 +1,27 @@
 import { MODULE_NAME } from "./constants.js";
+import { projectBeginDialog } from "./dialog.js";
 
-export async function beginAProject(crafterActor, itemDetails) {
-    // TODO: Put a dialog up to ask how much we wanna commit to it
+export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
         console.error("[HEROIC CRAFTING] Missing UUID when beginning a project!");
+        return;
+    }
+
+    let dialogResult = {};
+    if (!skipDialog) {
+        dialogResult = await projectBeginDialog(itemDetails);
+    } else {
+        dialogResult = { startingProgress: 0 };
+    }
+
+    console.log(dialogResult);
+
+    if (!dialogResult.startingProgress) {
+        return;
+    }
+
+    if (crafterActor.inventory.coins.copperValue < dialogResult.startingProgress) {
+        ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
         return;
     }
 
@@ -13,11 +31,12 @@ export async function beginAProject(crafterActor, itemDetails) {
         {
             ID: randomID(),
             ItemUUID: itemDetails.UUID,
-            progressInCopper: 0,
+            progressInCopper: dialogResult.startingProgress,
             batchSize: itemDetails.batchSize || 1
         }
     ];
 
+    await crafterActor.inventory.removeCoins({ cp: dialogResult.startingProgress });
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 

@@ -31,7 +31,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
                 batchSize
             };
 
-            await beginAProject(data.actor, itemDetails);
+            await beginAProject(data.actor, itemDetails, false);
         });
     }
     {
