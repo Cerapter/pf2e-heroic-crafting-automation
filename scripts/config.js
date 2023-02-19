@@ -1,5 +1,6 @@
 import { HeroicCraftingHourlySpendingLimit, spendingLimit, MODULE_NAME } from "./constants.js";
 import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay } from "./crafting.js";
+import { normaliseCoins, subtractCoins } from "./coins.js";
 
 Hooks.on(
     "init",
@@ -7,7 +8,9 @@ Hooks.on(
         game.pf2eHeroicCrafting = {
             HeroicCraftingHourlySpendingLimit,
             spendingLimit,
-            beginAProject
+            beginAProject,
+            normaliseCoins,
+            subtractCoins
         };
     }
 );

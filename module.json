@@ -1,7 +1,7 @@
 {
     "id": "pf2e-heroic-crafting",
-    "title": "PF2e Heroic Crafting",
-    "description": "Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio.",
+    "title": "PF2e Heroic Crafting Automation",
+    "description": "Companion Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio, supplying automation to their module of the supplement.",
     "version": "1.0",
     "authors": [
         {
@@ -29,11 +29,29 @@
                     "minimum": "4.7.4"
                 }
             }
+        ],
+        "requires": [
+            {
+                "id": "heroic-crafting",
+                "type": "module",
+                "manifest": "https://raw.githubusercontent.com/hivefrog-studio/heroic-crafting-foundry-module/master/module.json",
+                "compatibility": {
+                    "verified": "1.0.1"
+                }
+            }
         ]
     },
     "packs": [
         {
-            "label": "Heroic Crafting - Macros",
+            "label": "Heroic Crafting (Automation) - Items",
+            "name": "heroic-crafting-items",
+            "system": "pf2e",
+            "path": "packs/items.db",
+            "type": "Item",
+            "private": false
+        },
+        {
+            "label": "Heroic Crafting (Automation) - Macros",
             "name": "heroic-crafting-macros",
             "system": "pf2e",
             "path": "packs/macros.db",
