@@ -1,8 +1,8 @@
 // Shit that the system was too lazy to implement
 
 /// Converts a value in copper (so like, `1234`) to a Coins object where it tries to match the various denominations.
-export function normaliseCoins(copperValue) {
-    const pp = Math.floor(copperValue / 1000);
+export function normaliseCoins(copperValue, ignorePlatinums = true) {
+    const pp = ignorePlatinums ? 0 : Math.floor(copperValue / 1000);
     const gp = Math.floor(copperValue / 100) - pp * 10;
     const sp = Math.floor(copperValue / 10) - pp * 100 - gp * 10;
     const cp = copperValue - pp * 1000 - gp * 100 - sp * 10;

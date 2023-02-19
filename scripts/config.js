@@ -1,6 +1,7 @@
 import { HeroicCraftingHourlySpendingLimit, spendingLimit, MODULE_NAME } from "./constants.js";
 import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
+import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 
 Hooks.on(
     "init",
@@ -10,7 +11,11 @@ Hooks.on(
             spendingLimit,
             beginAProject,
             normaliseCoins,
-            subtractCoins
+            subtractCoins,
+            getTroves,
+            getTroveValue,
+            changeTroveValue,
+            payWithTroves
         };
     }
 );

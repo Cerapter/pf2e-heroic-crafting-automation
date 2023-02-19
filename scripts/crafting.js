@@ -1,6 +1,7 @@
-import { MODULE_NAME } from "./constants.js";
+import { MODULE_NAME, spendingLimit } from "./constants.js";
 import { projectBeginDialog, projectCraftDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
+import { payWithCoinsAndTrove, getTroves } from "./trove.js";
 
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
@@ -14,13 +15,18 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
     } else {
         dialogResult = { startingProgress: 0 };
     }
-    console.log(dialogResult);
 
     if (typeof dialogResult.startingProgress === "undefined") {
         return;
     }
 
-    if (crafterActor.inventory.coins.copperValue < dialogResult.startingProgress) {
+    const payment = payWithCoinsAndTrove(
+        dialogResult.payMethod,
+        crafterActor.inventory.coins,
+        getTroves(crafterActor),
+        new game.pf2e.Coins({ cp: dialogResult.startingProgress }));
+
+    if (!payment.canPay) {
         ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
         return;
     }
@@ -36,7 +42,15 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
         }
     ];
 
-    await crafterActor.inventory.removeCoins({ cp: dialogResult.startingProgress });
+    if (payment.removeCopper > 0) {
+        await crafterActor.inventory.removeCoins({ cp: payment.removeCopper });
+    };
+
+    if (payment.troveUpdates.length > 0) {
+        console.log(payment.troveUpdates);
+        await crafterActor.updateEmbeddedDocuments("Item", payment.troveUpdates);
+    }
+
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 
@@ -54,32 +68,29 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     if (!skipDialog) {
         dialogResult = await projectCraftDialog(crafterActor, itemDetails);
     } else {
-        //dialogResult = {};
+        dialogResult = {};
     }
 
-    // TODO: Finish
-    return;
+    if (typeof dialogResult.duration === "undefined") {
+        return;
+    }
 
-    if (crafterActor.inventory.coins.copperValue < dialogResult.startingProgress) {
+    const payment = payWithCoinsAndTrove(
+        dialogResult.payMethod,
+        crafterActor.inventory.coins,
+        getTroves(crafterActor),
+        game.pf2e.Coins.fromString(spendingLimit(dialogResult.duration, crafterActor.level)));
+    console.log("craftAProject", dialogResult, payment);
+
+    if (!payment.canPay) {
         ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
         return;
     }
 
-    let actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
+    /*game.pf2e.Check.roll(
 
-    const newProjects = [
-        {
-            ID: randomID(),
-            ItemUUID: itemDetails.UUID,
-            progressInCopper: dialogResult.startingProgress,
-            batchSize: itemDetails.batchSize || 1
-        }
-    ];
-
-    await crafterActor.inventory.removeCoins({ cp: dialogResult.startingProgress });
-    await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
+    )*/
 };
-
 
 export async function abandonProject(crafterActor, projectUUID) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
