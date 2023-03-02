@@ -101,6 +101,11 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
 
     if (project.progressInCopper + progressCost.copperValue >= cost.copperValue) {
+        ChatMessage.create({
+            user: game.user.id,
+            content: `<strong>${crafterActor.name}</strong> skips the Craft check for <strong>${projectItem.name}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.`,
+            speaker: { alias: crafterActor.name },
+        });
         progressProject(crafterActor, project.ID, true, progressCost);
     } else {
         rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: progressCost });
@@ -258,8 +263,18 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
                 return;
             }
 
+            ChatMessage.create({
+                user: game.user.id,
+                content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).`,
+                speaker: { alias: crafterActor.name },
+            });
             await abandonProject(crafterActor, projectUUID);
         } else {
+            ChatMessage.create({
+                user: game.user.id,
+                content: `<strong>${crafterActor.name}</strong> progresses on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, by ${coinAmount.toString()} (current: ${normaliseCoins(project.progressInCopper)} out of ${cost.toString()}).`,
+                speaker: { alias: crafterActor.name },
+            });
             await crafterActor.update({
                 [`flags.${MODULE_NAME}.projects`]: actorProjects.map((currProject => {
                     if (currProject.ID !== projectUUID) {
@@ -274,8 +289,18 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         project.progressInCopper -= coinAmount.copperValue;
 
         if (project.progressInCopper <= 0) {
+            ChatMessage.create({
+                user: game.user.id,
+                content: `<strong>${crafterActor.name}</strong> experiences setback on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, completely ruining it.`,
+                speaker: { alias: crafterActor.name },
+            });
             await abandonProject(crafterActor, projectUUID);
         } else {
+            ChatMessage.create({
+                user: game.user.id,
+                content: `<strong>${crafterActor.name}</strong> experiences setback on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, losing ${coinAmount.toString()} of progress (current: ${normaliseCoins(project.progressInCopper)} out of ${cost.toString()}).`,
+                speaker: { alias: crafterActor.name },
+            });
             await crafterActor.update({
                 [`flags.${MODULE_NAME}.projects`]: actorProjects.map((currProject => {
                     if (currProject.ID !== projectUUID) {
