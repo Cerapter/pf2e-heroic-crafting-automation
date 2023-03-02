@@ -137,6 +137,10 @@ export function payWithCoinsAndTrove(paymentOption, actorCoins, troves, costCoin
                 troveUpdates = canPayTrove.updates;
             }
             break;
+        case "free":
+            {
+                canPay = true;
+            }
         default:
             break;
     }

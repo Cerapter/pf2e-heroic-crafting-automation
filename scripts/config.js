@@ -1,5 +1,5 @@
 import { HeroicCraftingHourlySpendingLimit, spendingLimit, MODULE_NAME } from "./constants.js";
-import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay } from "./crafting.js";
+import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 
@@ -32,11 +32,14 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
 
         itemControls.find("a[data-action=heroic-crafting-begin-project]").on("click", async (event) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
+            const DC =
+                Number($(event.currentTarget).parent().siblings(".formula-dc").html()) || 14; // Level 0 DC
             const batchSize =
                 Number($(event.currentTarget).parent().siblings(".formula-quantity").children("input").val()) || 1;
             const itemDetails = {
                 UUID,
-                batchSize
+                batchSize,
+                DC
             };
 
             await beginAProject(data.actor, itemDetails, false);
@@ -71,4 +74,27 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
             await craftAProject(data.actor, itemDetails, false);
         });
     }
+})
+
+Hooks.on("renderChatMessage", async (data, html) => {
+    html.find(".card-buttons .heroic-crafting-chat-button").on("click", async (event) => {
+        event.preventDefault();
+
+        const button = $(event.currentTarget);
+        const [progress, amount, uuid, actorID] = [
+            button.attr("data-action") === "progress-heroic-crafting-project",
+            button.parent().parent().attr("data-heroic-crafting-progress"),
+            button.parent().parent().attr("data-project-uuid"),
+            button.parent().parent().attr("data-actor")
+        ];
+
+        const actor = game.actors.get(actorID);
+
+        if (!actor) return;
+        if (!game.user.isGM && !actor.isOwner) return;
+
+        progressProject(actor, uuid, progress, game.pf2e.Coins.fromString(amount));
+
+        button.attr("disabled", "true");
+    });
 })

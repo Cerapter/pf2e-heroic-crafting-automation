@@ -1,6 +1,17 @@
 import { subtractCoins } from "./coins.js";
 import { spendingLimit } from "./constants.js";
 
+const paymentOptionHtml = `<div class="form-group">
+    <label for="pay-method">Pay Method:</label>
+    <select id="pay-method" name="pay-method">
+        <option value="fullCoin" selected>Coins only</option>
+        <option value="preferCoin">Coins, then Troves</option>
+        <option value="preferTrove">Troves, then coins</option>
+        <option value="fullTrove">Material Troves only</option>
+        <option value="free">Free</option>
+    </select>
+</div>`;
+
 export async function projectBeginDialog(itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
@@ -26,15 +37,7 @@ export async function projectBeginDialog(itemDetails) {
                         <label for="spending-amount">Spent Materials:</label>
                         <input type="text" id="spending-amount" name="spending-amount">
                     </div>
-                    <div class="form-group">
-                        <label for="pay-method">Pay Method:</label>
-                        <select id="pay-method" name="pay-method">
-                            <option value="fullCoin" selected>Coins only</option>
-                            <option value="preferCoin">Coins, then Troves</option>
-                            <option value="preferTrove">Troves, then coins</option>
-                            <option value="fullTrove">Material Troves only</option>
-                        </select>
-                    </div>
+                    ${paymentOptionHtml}
                 </form>
             `,
         buttons: {
@@ -107,15 +110,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                             <option value=-10>-10</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="pay-method">Pay Method:</label>
-                        <select id="pay-method" name="pay-method">
-                            <option value="fullCoin" selected>Coins only</option>
-                            <option value="preferCoin">Coins, then Troves</option>
-                            <option value="preferTrove">Troves, then coins</option>
-                            <option value="fullTrove">Material Troves only</option>
-                        </select>
-                    </div>
+                    ${paymentOptionHtml}
                 </form>
             `,
         buttons: {

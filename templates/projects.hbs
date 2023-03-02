@@ -9,6 +9,9 @@
             <div class="level-name flexrow">
                 <h3>Name</h3>
             </div>
+            <div class="formula-dc-header">
+                DC
+            </div>
             <div class="formula-quantity-header">
                 Quantity
             </div>
@@ -23,6 +26,9 @@
                         <img class="item-icon" src="{{project.img}}" alt="{{project.name}}">
                     </div>
                     <h4>{{project.name}}</h4>
+                </div>
+                <div class="formula-dc">
+                    {{project.DC}}
                 </div>
                 <div class="formula-quantity">
                     <input type="number" class="formula-number" data-action="enter-quantity" value="{{project.batch}}" readonly />
