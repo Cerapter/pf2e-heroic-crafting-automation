@@ -97,7 +97,14 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
 
     const project = crafterActor.getFlag(MODULE_NAME, "projects").filter(project => project.ID === itemDetails.projectUUID)[0];
 
-    rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: progressCost });
+    const projectItem = await fromUuid(project.ItemUUID);
+    const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
+
+    if (project.progressInCopper + progressCost.copperValue >= cost.copperValue) {
+        progressProject(crafterActor, project.ID, true, progressCost);
+    } else {
+        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: progressCost });
+    }
 };
 
 function rollCraftAProject(crafterActor, project, details) {
