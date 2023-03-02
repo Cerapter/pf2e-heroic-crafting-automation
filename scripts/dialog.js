@@ -56,7 +56,7 @@ export async function projectBeginDialog(itemDetails) {
                 icon: "<i class='fa-solid fa-ban'></i>",
             }
         },
-        default: "cancel",
+        default: "ok",
         render: ([content]) => {
             content
                 .querySelector("[id=spending-amount]")
@@ -133,7 +133,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                 }
             }
         },
-        default: "cancel",
+        default: "ok",
         render: ([content]) => {
             content
                 .querySelector("[id=craftDuration]")

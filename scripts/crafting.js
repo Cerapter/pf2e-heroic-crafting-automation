@@ -51,6 +51,11 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
         await crafterActor.updateEmbeddedDocuments("Item", payment.troveUpdates);
     }
 
+    ChatMessage.create({
+        user: game.user.id,
+        content: `<strong>${crafterActor.name}</strong> starts a project of <strong>${(await fromUuid(itemDetails.UUID)).name}</strong> with the Current Value of ${normaliseCoins(dialogResult.startingProgress)}.`,
+        speaker: { alias: crafterActor.name },
+    });
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 
