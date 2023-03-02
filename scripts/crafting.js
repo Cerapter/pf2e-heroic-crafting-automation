@@ -97,7 +97,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
 
     const project = crafterActor.getFlag(MODULE_NAME, "projects").filter(project => project.ID === itemDetails.projectUUID)[0];
 
-    rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, progress: progressCost });
+    rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: progressCost });
 };
 
 function rollCraftAProject(crafterActor, project, details) {
@@ -145,6 +145,14 @@ function rollCraftAProject(crafterActor, project, details) {
     const options = crafterActor.getRollOptions(['all', 'skill-check', skillName.toLowerCase()]);
     options.push(`action:craft`);
     options.push(`action:craft-heroic-project`);
+
+    if (details.overtime != 0) {
+        modifiers.push(new game.pf2e.Modifier({
+            label: "Overtime",
+            modifier: details.overtime,
+            type: "untyped",
+        }));
+    }
 
     game.pf2e.Check.roll(
         new game.pf2e.CheckModifier(
