@@ -1,7 +1,7 @@
 {
     "id": "pf2e-heroic-crafting",
     "title": "PF2e Heroic Crafting Automation",
-    "description": "Companion Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio, supplying automation to their module of the supplement.",
+    "description": "Companion Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio, supplying only automation.",
     "version": "1.0",
     "authors": [
         {
@@ -27,16 +27,6 @@
                 "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
                     "minimum": "4.7.4"
-                }
-            }
-        ],
-        "requires": [
-            {
-                "id": "heroic-crafting",
-                "type": "module",
-                "manifest": "https://raw.githubusercontent.com/hivefrog-studio/heroic-crafting-foundry-module/master/module.json",
-                "compatibility": {
-                    "verified": "1.0.1"
                 }
             }
         ]
