@@ -1,4 +1,4 @@
-import { subtractCoins } from "./coins.js";
+import { normaliseCoins, subtractCoins } from "./coins.js";
 import { spendingLimit } from "./constants.js";
 
 const paymentOptionHtml = `<div class="form-group">
@@ -24,18 +24,16 @@ export async function projectBeginDialog(itemDetails) {
                         <section>
                             <h1>Begin A Project</h1>
                         </section>
+                        <section>
+                            <span>Current Project:</span> <strong>${item.name}</strong>
+                        </section>
+                        <section>
+                            Remaining Materials / Maximum Cost: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">OVERSPENDING!</strong></span>
+                        </section>
                     </body>
                     <div class="form-group">
-                        <span>Current Project:</span>
-                        <strong>${item.name}</strong>
-                    </div>
-                    <div class="form-group">
-                        <span>Remaining Spending:</span>
-                        <strong class="remaining-spending">${maxCost}</strong>
-                    </div>
-                    <div class="form-group">
-                        <label for="spending-amount">Spent Materials:</label>
-                        <input type="text" id="spending-amount" name="spending-amount">
+                        <label for="spendingAmount">Spent Materials:</label>
+                        <input type="text" id="spendingAmount" name="spendingAmount" placeholder="0 gp">
                     </div>
                     ${paymentOptionHtml}
                 </form>
@@ -46,7 +44,7 @@ export async function projectBeginDialog(itemDetails) {
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
                     return {
-                        startingProgress: game.pf2e.Coins.fromString($(html).find("#spending-amount")[0].value).copperValue,
+                        startingProgress: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value).copperValue,
                         payMethod: $(html).find("#pay-method")[0].value
                     };
                 }
@@ -59,19 +57,29 @@ export async function projectBeginDialog(itemDetails) {
         default: "ok",
         render: ([content]) => {
             content
-                .querySelector("[id=spending-amount]")
+                .querySelector("[id=spendingAmount]")
                 .addEventListener("keyup", (event) => {
                     const currentSpending = game.pf2e.Coins.fromString(event.target.value);
                     const remainingSpending = subtractCoins(maxCost, currentSpending);
 
+                    const form = $(event.target).parent().parent();
+                    form.find("[id=remainingMaterials]").html(remainingSpending.toString());
+
                     if (remainingSpending.copperValue < 0) {
                         $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").attr("disabled", "true");
-                        $(event.target).parent().parent().find(".remaining-spending").html("Overspending!");
+                        form.find("[id=spanNotOverspending]").attr("hidden", true);
+                        form.find("[id=spanOverspending]").removeAttr("hidden");
                     } else {
                         $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").removeAttr("disabled");
-                        $(event.target).parent().parent().find(".remaining-spending").html(remainingSpending.toString());
+                        form.find("[id=spanNotOverspending]").removeAttr("hidden");
+                        form.find("[id=spanOverspending]").attr("hidden", true);
                     }
                 });
+
+            content
+                .querySelector("[id=maxCost]").innerHTML = maxCost;
+            content
+                .querySelector("[id=remainingMaterials]").innerHTML = maxCost;
         },
     }, { width: 350 });
 }
@@ -91,9 +99,13 @@ export async function projectCraftDialog(actor, itemDetails) {
                             Current Project: <strong>${item.name}</strong>
                         </section>
                         <section>
-                            Maximum Cost: <strong id="maxCost">0 gp</strong>
+                            Remaining Materials / Maximum Cost: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">OVERSPENDING!</strong></span>
                         </section>
                     </body>
+                    <div class="form-group">
+                        <label for="spendingAmount">Spent Materials:</label>
+                        <input type="text" id="spendingAmount" name="spendingAmount" placeholder="0 gp">
+                    </div>
                     <div class="form-group">
                         <label for="craftDuration">Crafting Duration:</label>
                         <select autofocus id="craftDuration" name="craftDuration">
@@ -135,16 +147,43 @@ export async function projectCraftDialog(actor, itemDetails) {
         },
         default: "ok",
         render: ([content]) => {
+
             content
                 .querySelector("[id=craftDuration]")
                 .addEventListener("change", (event) => {
-                    const maxCost = spendingLimit(event.target.value, actor.level);
+                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).copperValue);
                     $(event.target).parent().parent().find("[id=maxCost]").html(maxCost.toString());
+
+                    event.target.parentElement.parentElement.querySelector("#spendingAmount").dispatchEvent(new Event("keyup"));
+                    //$(event.target).parent().parent().find("[id=spendingAmount]").dispatchEvent(new Event("keyup"));
                 });
 
-            const maxCost = spendingLimit("Hour", actor.level);
+            content
+                .querySelector("[id=spendingAmount]")
+                .addEventListener("keyup", (event) => {
+                    const maxCost = game.pf2e.Coins.fromString($(event.target).parent().parent().find("[id=maxCost]").html());
+                    const currentSpending = game.pf2e.Coins.fromString(event.target.value);
+                    const remainingSpending = subtractCoins(maxCost, currentSpending);
+
+                    const form = $(event.target).parent().parent();
+                    form.find("[id=remainingMaterials]").html(remainingSpending.toString());
+
+                    if (remainingSpending.copperValue < 0) {
+                        $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").attr("disabled", "true");
+                        form.find("[id=spanNotOverspending]").attr("hidden", true);
+                        form.find("[id=spanOverspending]").removeAttr("hidden");
+                    } else {
+                        $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").removeAttr("disabled");
+                        form.find("[id=spanNotOverspending]").removeAttr("hidden");
+                        form.find("[id=spanOverspending]").attr("hidden", true);
+                    }
+                });
+
+            const maxCost = spendingLimit("Hour", actor.level).scale(itemDetails.batchSize);
             content
                 .querySelector("[id=maxCost]").innerHTML = maxCost;
+            content
+                .querySelector("[id=remainingMaterials]").innerHTML = maxCost;
         },
     });
 }

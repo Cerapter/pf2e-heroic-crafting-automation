@@ -66,9 +66,12 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         projectControls.find("a[data-action=project-craft]").on("click", async (event) => {
             const projectUUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
             const itemUUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
+            const batchSize =
+                Number($(event.currentTarget).parent().siblings(".formula-quantity").children("input").val()) || 1;
             const itemDetails = {
                 UUID: itemUUID,
-                projectUUID
+                projectUUID,
+                batchSize
             };
 
             await craftAProject(data.actor, itemDetails, false);
