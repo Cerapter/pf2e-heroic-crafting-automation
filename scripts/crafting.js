@@ -2,6 +2,7 @@ import { MODULE_NAME, spendingLimit } from "./constants.js";
 import { projectBeginDialog, projectCraftDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
+import { extractDegreeOfSuccessAdjustments, extractRollTwice, extractRollSubstitutions } from "./system.js";
 
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
@@ -162,7 +163,10 @@ function rollCraftAProject(crafterActor, project, details) {
     }
 
     const options = crafterActor.getRollOptions(domains);
-    options.push(`action:craft`, `action:craft-heroic-project`, `skill:rank:${skill.rank}`, proficiency[skill.rank]);
+    options.push(`action:craft`, `action:craftproj`, `skill:rank:${skill.rank}`, proficiency[skill.rank]);
+    const rollTwice = extractRollTwice(crafterActor.synthetics.rollTwice, domains, options);
+    const substitutions = extractRollSubstitutions(crafterActor.synthetics.rollSubstitutions, domains, options);
+    const dosAdjustments = extractDegreeOfSuccessAdjustments(crafterActor.synthetics, domains);
 
     if (details.overtime != 0) {
         modifiers.push(new game.pf2e.Modifier({
@@ -180,6 +184,10 @@ function rollCraftAProject(crafterActor, project, details) {
             actor: crafterActor,
             type: 'skill-check',
             options,
+            domains,
+            rollTwice,
+            substitutions,
+            dosAdjustments,
             createMessage: false,
             notes,
             dc: {
