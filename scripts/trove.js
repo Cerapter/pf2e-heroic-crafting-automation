@@ -2,7 +2,7 @@ import { subtractCoins } from "./coins.js";
 import { MODULE_NAME, spendingLimit } from "./constants.js";
 
 export function getTroves(actor) {
-    return actor.itemTypes.equipment.filter(equipment => equipment.flags[MODULE_NAME].isMaterialTrove == true);
+    return actor.itemTypes.equipment.filter(equipment => equipment.flags[MODULE_NAME] && equipment.flags[MODULE_NAME].isMaterialTrove == true);
 }
 
 export function getTroveValue(troves) {
