@@ -2,8 +2,8 @@ import { normaliseCoins, subtractCoins } from "./coins.js";
 import { spendingLimit } from "./constants.js";
 
 const paymentOptionHtml = `<div class="form-group">
-    <label for="pay-method">Pay Method:</label>
-    <select id="pay-method" name="pay-method">
+    <label for="payMethod">Pay Method:</label>
+    <select id="payMethod" name="payMethod">
         <option value="fullCoin" selected>Coins only</option>
         <option value="preferCoin">Coins, then Troves</option>
         <option value="preferTrove">Troves, then coins</option>
@@ -45,7 +45,7 @@ export async function projectBeginDialog(itemDetails) {
                 callback: (html) => {
                     return {
                         startingProgress: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value).copperValue,
-                        payMethod: $(html).find("#pay-method")[0].value
+                        payMethod: $(html).find("#payMethod")[0].value
                     };
                 }
             },
@@ -133,7 +133,8 @@ export async function projectCraftDialog(actor, itemDetails) {
                     return {
                         duration: $(html).find("#craftDuration")[0].value,
                         overtime: Number($(html).find("#overtimePenalty")[0].value) || 0,
-                        payMethod: $(html).find("#pay-method")[0].value
+                        payMethod: $(html).find("#payMethod")[0].value,
+                        spendingAmount: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value)
                     };
                 }
             },

@@ -80,12 +80,11 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         return;
     }
 
-    const progressCost = game.pf2e.Coins.fromString(spendingLimit(dialogResult.duration, crafterActor.level));
     const payment = payWithCoinsAndTrove(
         dialogResult.payMethod,
         crafterActor.inventory.coins,
         getTroves(crafterActor),
-        progressCost);
+        dialogResult.spendingAmount);
 
     if (!payment.canPay) {
         ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
@@ -105,25 +104,28 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     const projectItem = await fromUuid(project.ItemUUID);
     const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
 
-    if (project.progressInCopper + progressCost.copperValue >= cost.copperValue) {
+    if (project.progressInCopper + dialogResult.spendingAmount.copperValue >= cost.copperValue) {
         ChatMessage.create({
             user: game.user.id,
             content: `<strong>${crafterActor.name}</strong> skips the Craft check for <strong>${projectItem.name}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.`,
             speaker: { alias: crafterActor.name },
         });
-        progressProject(crafterActor, project.ID, true, progressCost);
+        progressProject(crafterActor, project.ID, true, dialogResult.spendingAmount);
     } else {
-        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: progressCost });
+        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: dialogResult.spendingAmount });
     }
 };
 
 function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
     const skillKey = "cra";
-    const skillName = CONFIG.PF2E.skills[skillKey];
+    const skill = crafterActor.system.skills[skillKey];
+    const skillName = game.i18n.localize(CONFIG.PF2E.skills[skillKey]);
+    const proficiency = ["proficiency:untrained", "proficiency:trained", "proficiency:expert", "proficiency:master", "proficiency:legendary"]; // Reimplementing system functionality be like: 
     const modifiers = [];
     const traits = [];
-    const notes = [...crafterActor.system.skills[skillKey].notes];
+    const notes = [...skill.notes];
+    const domains = ['all', 'skill-check', skillName.toLowerCase(), `${skill.ability}-based`, `${skill.ability}-skill-check`];
 
     {
         notes.push({
@@ -159,9 +161,8 @@ function rollCraftAProject(crafterActor, project, details) {
             .forEach(traitObject => traits.push(traitObject));
     }
 
-    const options = crafterActor.getRollOptions(['all', 'skill-check', skillName.toLowerCase()]);
-    options.push(`action:craft`);
-    options.push(`action:craft-heroic-project`);
+    const options = crafterActor.getRollOptions(domains);
+    options.push(`action:craft`, `action:craft-heroic-project`, `skill:rank:${skill.rank}`, proficiency[skill.rank]);
 
     if (details.overtime != 0) {
         modifiers.push(new game.pf2e.Modifier({
