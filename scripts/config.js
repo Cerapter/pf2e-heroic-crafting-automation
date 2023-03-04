@@ -1,4 +1,4 @@
-import { HeroicCraftingHourlySpendingLimit, spendingLimit, MODULE_NAME } from "./constants.js";
+import { HeroicCraftingHourlySpendingLimit, HeroicCraftingGatheredIncome, spendingLimit, MODULE_NAME } from "./constants.js";
 import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
@@ -8,6 +8,7 @@ Hooks.on(
     () => {
         game.pf2eHeroicCrafting = {
             HeroicCraftingHourlySpendingLimit,
+            HeroicCraftingGatheredIncome,
             spendingLimit,
             beginAProject,
             normaliseCoins,

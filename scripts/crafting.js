@@ -119,8 +119,8 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
 
 function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
-    const skillName = "Crafting";
     const skillKey = "cra";
+    const skillName = CONFIG.PF2E.skills[skillKey];
     const modifiers = [];
     const traits = [];
     const notes = [...crafterActor.system.skills[skillKey].notes];
