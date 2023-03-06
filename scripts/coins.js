@@ -1,6 +1,13 @@
 // Shit that the system was too lazy to implement
 
-/// Converts a value in copper (so like, `1234`) to a Coins object where it tries to match the various denominations.
+/**
+ * Converts a value in copper (so like, `1234`) to a Coins object where it tries to match the various denominations.
+ * 
+ * @param {number} copperValue A numerical value, usually the copperValue getter of a Coins object.
+ * @param {boolean} ignorePlatinums Defaults to true, and if so, will not attempt to convert to platinums. 
+ * PF2E keeps to gold usually as the highest denomination.
+ * @returns {game.pf2e.Coins} A Coins object with values divided as best as possible amongst the denominations.
+ */
 export function normaliseCoins(copperValue, ignorePlatinums = true) {
     const pp = ignorePlatinums ? 0 : Math.floor(copperValue / 1000);
     const gp = Math.floor(copperValue / 100) - pp * 10;
@@ -15,7 +22,14 @@ export function normaliseCoins(copperValue, ignorePlatinums = true) {
     });
 }
 
-/// Given two Coins objects, subtracts one from the other.
+/**
+ * Given two Coins objects, subtracts one from the other.
+ * I tried game.pf2e.Coins.add() with negatives, but it gives back denominations with minus values. :weary:
+ * 
+ * @param {game.pf2e.Coins} minuend The Coins object that you are subtracting from. 
+ * @param {game.pf2e.Coins} subtrahend The Coins object that you are substracting.
+ * @returns {game.pf2e.Coins} A new Coins object that is the difference of the minuend and subtrahend.
+ */
 export function subtractCoins(minuend, subtrahend) {
     return normaliseCoins(minuend.copperValue - subtrahend.copperValue);
 }

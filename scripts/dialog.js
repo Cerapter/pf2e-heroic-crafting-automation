@@ -1,6 +1,7 @@
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { spendingLimit } from "./constants.js";
 
+/** A quick HTML piece for the whole prefer coins / prefer trove thing. @see payWithCoinsAndTrove() */
 const paymentOptionHtml = `<div class="form-group">
     <label for="payMethod">Pay Method:</label>
     <select id="payMethod" name="payMethod">
@@ -12,6 +13,22 @@ const paymentOptionHtml = `<div class="form-group">
     </select>
 </div>`;
 
+/**
+ * Creates a dialog 
+ * 
+ * @param {Object} itemDetails The details of the item to make a project of.
+ * @param {string} itemDetails.UUID The UUID of the item.
+ * @param {number} itemDetails.batchSize The size of the batch of the item being crafted.
+ * Usually 1, 4 or 10, but feats can change this.
+ * @param {number} itemDetails.DC The crafting DC of the item.
+ * @returns {{startingProgress: game.pf2e.Coins, 
+ * payMethod: "fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} | "cancel"} 
+ * An anonymous struct of two values.  
+ * - `startingProgress` is the Coins object of the project's starting Current Value.
+ * - `payMethod` is the choice of how said starting progress should be paid -- see payWithCoinsAndTrove()
+ * 
+ * Alternatively, the dialog can return "cancel" if the user pressed the Cancel button.
+ */
 export async function projectBeginDialog(itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
@@ -84,6 +101,26 @@ export async function projectBeginDialog(itemDetails) {
     }, { width: 350 });
 }
 
+/**
+ * 
+ * @param {ActorPF2e} actor 
+ * @param {Object} itemDetails The details of the item to make a project of.
+ * @param {string} itemDetails.UUID The UUID of the item.
+ * @param {string} itemDetails.projectUUID The UUID of the project itself. Unused.
+ * @param {number} itemDetails.batchSize The size of the batch of the item being crafted. 
+ * Usually 1, 4 or 10, but feats can change this.
+ * @returns {{duration: "hour" | "day" | "week", 
+ * overtime: 0 | -5 | -10, 
+ * payMethod: "fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free", 
+ * spendingAmount: game.pf2e.Coins} |{}} 
+ * An anonymous struct of four values.  
+ * - `duration` determines for how long the crafting activity continues.  
+ * - `overtime` is the Overtime penalty the crafting activity is taking.  
+ * - `payMethod` is the choice of how the crafting activity should be paid for -- see payWithCoinsAndTrove()  
+ * - `spendingAmount` is the Coin the activity will cost.
+ * 
+ * Alternatively, if cancelled, the dialog will return an empty struct.
+ */
 export async function projectCraftDialog(actor, itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
 
@@ -156,7 +193,6 @@ export async function projectCraftDialog(actor, itemDetails) {
                     $(event.target).parent().parent().find("[id=maxCost]").html(maxCost.toString());
 
                     event.target.parentElement.parentElement.querySelector("#spendingAmount").dispatchEvent(new Event("keyup"));
-                    //$(event.target).parent().parent().find("[id=spendingAmount]").dispatchEvent(new Event("keyup"));
                 });
 
             content

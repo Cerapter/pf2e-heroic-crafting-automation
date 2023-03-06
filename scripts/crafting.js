@@ -4,6 +4,22 @@ import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
 import { extractDegreeOfSuccessAdjustments, extractRollTwice, extractRollSubstitutions } from "./system.js";
 
+/**
+ * Begins a new project for an actor, adding said project to the flags of the actor, 
+ * and removing value from the actor's coins / Troves if needed.
+ * 
+ * When all successful, creates a ChatMessage announcing the beginning of the project,
+ * and appends the new project to the actor's projects flag.
+ * 
+ * @param {ActorPF2e} crafterActor The actor who begins the project. 
+ * @param {Object} itemDetails The details of the item to make a project of.
+ * @param {string} itemDetails.UUID The UUID of the item.
+ * @param {number} itemDetails.batchSize The size of the batch of the item being crafted. 
+ * Usually 1, 4 or 10, but feats can change this.
+ * @param {number} itemDetails.DC The crafting DC of the item.
+ * @param {boolean} skipDialog Defaults to true. 
+ * If it is, well, it skips the dialog, setting the startingProgress to 0.
+ */
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
         console.error("[HEROIC CRAFTING] Missing UUID when beginning a project!");
@@ -60,6 +76,22 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 
+/**
+ * Crafts a project -- or rather, handles every related function that is responsible for crafting a project.
+ * 
+ * @see projectCraftDialog() for the actual adjusting of craft-a-project variables.
+ * @see progressProject() for the "skip the check if activity's cost is equal to 
+ * or larger than the remainder" logic.
+ * @see rollCraftAProject() for the actual crafting-a-project logic.
+ * 
+ * @param {ActorPF2e} crafterActor The actor who is crafting the project. 
+ * @param {Object} itemDetails The details of the item to make a project of.
+ * @param {string} itemDetails.UUID The UUID of the item.
+ * @param {string} itemDetails.projectUUID The UUID of the project itself.
+ * @param {number} itemDetails.batchSize The size of the batch of the item being crafted. 
+ * @param {boolean} skipDialog Defaults to true. 
+ * Despite that, it's currently unused, and is always called with a false instead.
+ */
 export async function craftAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
         console.error("[HEROIC CRAFTING] Missing Item UUID when crafting a project!");
@@ -113,10 +145,37 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         });
         progressProject(crafterActor, project.ID, true, dialogResult.spendingAmount);
     } else {
-        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, progress: dialogResult.spendingAmount });
+        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount });
     }
 };
 
+/**
+ * Rolls a check to craft a project.
+ * 
+ * Creates a ChatMessage with a button to either progress the project or deduct from its progress,
+ * based on the result.
+ * 
+ * Has a few features reimplemented from system, like domains, proficiency, traits, rollTwice,
+ * substitutions, and DoSAdjustments, and has the `action:craftproj` RollOption, so it should be
+ * able to innately listen to the Heroic Crafting module's stuff.  
+ * However, their automation is manually done in here, usually.
+ * 
+ * @param {ActorPF2e} crafterActor The actor who is crafting the project. 
+ * @param {Object} project The project being worked on.
+ * @param {string} project.ID The UUID of the project itself.
+ * @param {string} project.ItemUUID The UUID of the item specifically. Unused.
+ * @param {number} project.progressInCopper The current progress on the project, measured in copper.
+ * @param {number} project.batchSize The amount of items being made at once.
+ * Usually relevant for consumables more, and is 1 for permanent items. 
+ * @param {number} project.DC The Crafting DC of the project. 
+ * Used to determine if the roll's a success or not.
+ * @param {Object} details Variables that change in some way how the craft roll should go.
+ * @param {"hour" | "day" | "week"} details.duration The check gains the "Downtime" trait if 
+ * the duration is "day" or "week", and the "Exploration" trait if it's "hour".
+ * @param {0 | -5 | -10} details.overtime If not zero, applies an untyped "Overtime" penalty to the check.
+ * @param {game.coins.pf2e} details.craftingMaterials The amount of value the actor spent trying to craft. 
+ * The progress made is based on this.
+ */
 function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
     const skillKey = "cra";
@@ -203,13 +262,13 @@ function rollCraftAProject(crafterActor, project, details) {
 
                 if (outcome === "success" || outcome === "criticalSuccess") {
                     craftDetails.progress = true;
-                    craftDetails.progressCost = details.progress.scale(2).toString();
+                    craftDetails.progressCost = details.craftingMaterials.scale(2).toString();
                 } else if (outcome === "failure") {
                     craftDetails.progress = true;
-                    craftDetails.progressCost = details.progress.scale(0.5).toString();
+                    craftDetails.progressCost = details.craftingMaterials.scale(0.5).toString();
                 } else {
                     craftDetails.progress = false;
-                    craftDetails.progressCost = details.progress.toString();
+                    craftDetails.progressCost = details.craftingMaterials.toString();
                 }
 
                 const flavour = await renderTemplate(`modules/${MODULE_NAME}/templates/crafting-result.hbs`, craftDetails);
@@ -220,11 +279,39 @@ function rollCraftAProject(crafterActor, project, details) {
     );
 }
 
+/**
+ * A convenience function to remove a project from an actor.
+ * 
+ * @param {ActorPF2e} crafterActor The actor to remove a project from. 
+ * @param {string} projectUUID The UUID of the project to remove. 
+ */
 export async function abandonProject(crafterActor, projectUUID) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.filter(project => project.ID !== projectUUID) });
 }
 
+/**
+ * Formats an actor's projects in a display-ready way.
+ * 
+ * @param {ActorPF2e} crafterActor The actor whose projects to get.
+ * @returns {{
+ * projectUuid: string,
+ * itemUuid: string,
+ * img: string,
+ * name: string,
+ * DC: number,
+ * cost: game.pf2e.Coins,
+ * currentlyDone: number,
+ * progress: number}[]} An array of structs with the following data:  
+ * - `projectUuid`: the UUID of the project itself.  
+ * - `itemUuid`: the UUID of the item the project is about.
+ * - `img`: a relative link to the item's image, starting from the default Foundry asset root directory.
+ * - `name`: the display-ready name of the item.
+ * - `DC`: the craft DC of the project.
+ * - `cost`: the overall cost of the project in a Coins object.
+ * - `currentlyDone`: the progress on the project in copper.
+ * - `progress`: the percentage (going from 0 to 1) of the project's completion.
+ */
 export async function getProjectsToDisplay(crafterActor) {
     const projects = crafterActor.getFlag(MODULE_NAME, 'projects') ?? [];
 
@@ -250,6 +337,22 @@ export async function getProjectsToDisplay(crafterActor) {
     return projectItems;
 }
 
+/**
+ * Advances the project's completion either forwards or backwards.
+ * 
+ * Can remove the project if the project is completed, or if the project experiences a setback so big,
+ * the progress reaches 0 or goes below it.
+ * 
+ * Announces with a ChatMessage the progress, and if said progress ends the project.
+ * 
+ * @param {ActorPF2e} crafterActor The actor whose project to progress or regress.
+ * @param {string} projectUUID The UUID of the project.
+ * @param {boolean} hasProgressed If true, `amount` will be added to the project's current progress.
+ * If false, it will be subtracted.
+ * @param {string} amount A string of the progressed value, formatted like a Coins object 
+ * (so for example, "5 gp, 4 sp"). 
+ * @returns 
+ */
 export async function progressProject(crafterActor, projectUUID, hasProgressed, amount) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
     const project = actorProjects.filter(project => project.ID === projectUUID)[0];

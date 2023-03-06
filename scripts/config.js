@@ -3,6 +3,7 @@ import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, pro
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 
+/// Exposes the various functions and constants for usage in macros.
 Hooks.on(
     "init",
     () => {
@@ -21,10 +22,11 @@ Hooks.on(
     }
 );
 
+/// Extends the crafting tab of the character sheet with Heroic Crafting stuff.
 Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
     const craftingTab = html.find(".tab.crafting");
     {
-        // Add Heroic Crafting "Begin a Project" button to each formula
+        //! Add Heroic Crafting "Begin a Project" button to each formula
         const formulas = craftingTab.find(".known-formulas");
         const formulaItems = formulas.find(".formula-item");
         const itemControls = formulaItems.find(".item-controls");
@@ -47,7 +49,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         });
     }
     {
-        // Adding Heroic Crafting projects
+        //! Adding Heroic Crafting projects
         const craftingEntries = craftingTab.find(".craftingEntry-list");
         const projects = await getProjectsToDisplay(data.actor);
 
@@ -55,7 +57,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         craftingEntries.append(template);
     }
     {
-        // Add functionality to Heroic Crafting project buttons
+        //! Add functionality to Heroic Crafting project buttons
         const projectControls = craftingTab.find(".heroic-crafting-project-controls");
 
         projectControls.find("a[data-action=project-delete]").on("click", async (event) => {
@@ -80,6 +82,8 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
     }
 })
 
+/// Used for the crafting message to make the progress / deduction button 
+/// add / remove Current Value from a character's project.
 Hooks.on("renderChatMessage", async (data, html) => {
     html.find(".card-buttons .heroic-crafting-chat-button").on("click", async (event) => {
         event.preventDefault();
