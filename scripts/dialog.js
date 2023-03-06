@@ -1,5 +1,5 @@
 import { normaliseCoins, subtractCoins } from "./coins.js";
-import { spendingLimit } from "./constants.js";
+import { CheckFeat, spendingLimit } from "./constants.js";
 
 /** A quick HTML piece for the whole prefer coins / prefer trove thing. @see payWithCoinsAndTrove() */
 const paymentOptionHtml = `<div class="form-group">
@@ -112,17 +112,111 @@ export async function projectBeginDialog(itemDetails) {
  * @returns {{duration: "hour" | "day" | "week", 
  * overtime: 0 | -5 | -10, 
  * payMethod: "fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free", 
- * spendingAmount: game.pf2e.Coins} |{}} 
+ * spendingAmount: game.pf2e.Coins,
+ * customValues: {name: string, value: boolean}[]} |{}} 
  * An anonymous struct of four values.  
  * - `duration` determines for how long the crafting activity continues.  
  * - `overtime` is the Overtime penalty the crafting activity is taking.  
  * - `payMethod` is the choice of how the crafting activity should be paid for -- see payWithCoinsAndTrove()  
  * - `spendingAmount` is the Coin the activity will cost.
+ * - `customValues` is an array of name-value pairs that were gathered from additional configurations given by feats.
  * 
  * Alternatively, if cancelled, the dialog will return an empty struct.
  */
 export async function projectCraftDialog(actor, itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
+    const extraHTML = [];
+    const extraRender = [];
+    let spendingLimitMultiplier = 1;
+
+    // TODO: Lift this feat checking part out.
+    if (CheckFeat(actor, "hyperfocus")) {
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="hyperfocus">Hyperfocus:</label>
+            <input type="checkbox" id="hyperfocus" name="hyperfocus" checked disabled>
+        </div>
+        <p class="notes">Applies while you have the feat. Make more progress on critical successes on a check to Craft a Project for at least a day.</p>
+        `)
+    }
+
+    if (CheckFeat(actor, "midnight-crafting")) {
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="midnightCrafting">Midnight Crafting:</label>
+            <input type="checkbox" id="midnightCrafting" name="midnightCrafting">
+        </div>
+        <p class="notes" id="midnightCraftingNotes">Craft in 10 minutes. No rush surcharge.</p>
+        `);
+
+        extraRender.push(
+            (content) => {
+                content
+                    .querySelector("[id=midnightCrafting]")
+                    .addEventListener("change", (event) => {
+                        const rushCost = game.pf2e.Coins.fromString($(event.target).parent().parent().find("[id=spendingAmount]").val());
+
+                        if (event.target.checked === true) {
+                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(`Craft in 10 minutes. Pay extra ${rushCost.toString()} in rush costs.`);
+                        } else {
+                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(`Craft in 10 minutes. No rush surcharge.`);
+                        }
+                    });
+
+                content
+                    .querySelector("[id=spendingAmount]")
+                    .addEventListener("keyup", (event) => {
+                        event.target.parentElement.parentElement.querySelector("#midnightCrafting").dispatchEvent(new Event("change"));
+                    });
+            }
+        )
+    }
+
+    if (CheckFeat(actor, "natural-born-tinker")) {
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="naturalBornTinker">Natural-Born Tinker:</label>
+            <input type="checkbox" id="naturalBornTinker" name="naturalBornTinker">
+        </div>
+        <p class="notes">Craft with Survival instead of Crafting?</p>
+        `);
+    }
+
+    if (CheckFeat(actor, "efficient-crafting")) {
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="efficientCrafting">Efficient Crafting:</label>
+            <input type="checkbox" id="efficientCrafting" name="efficientCrafting">
+        </div>
+        <p class="notes">Recover materials on a failure? (Check manually if applies!)</p>
+        `);
+    }
+
+    if (CheckFeat(actor, "quick-crafting")) {
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="quickCrafting">Quick Crafting:</label>
+            <input type="checkbox" id="quickCrafting" name="quickCrafting">
+        </div>
+        <p class="notes">Double the spending limit?</p>
+        `);
+
+        extraRender.push(
+            (content) => {
+                content
+                    .querySelector("[id=quickCrafting]")
+                    .addEventListener("change", (event) => {
+                        spendingLimitMultiplier = event.target.checked ? 2 : 1;
+                        event.target.parentElement.parentElement.querySelector("#craftDuration").dispatchEvent(new Event("change"));
+                    });
+            }
+        )
+    }
+
+    // Purely a fancy thing, but add a horizontal line in front of the custom feat stuff if there is any.
+    if (extraHTML.length > 0) {
+        extraHTML.unshift(`<hr>`);
+    }
 
     return await Dialog.wait({
         title: "Craft A Project",
@@ -160,6 +254,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                         </select>
                     </div>
                     ${paymentOptionHtml}
+                    ${extraHTML.join('\n')}
                 </form>
             `,
         buttons: {
@@ -167,11 +262,23 @@ export async function projectCraftDialog(actor, itemDetails) {
                 label: "Craft Project",
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
+                    const customValues = [];
+
+                    $(html).find(".extra-craft-modifiers input").each(function () {
+                        const input = $(this)[0];
+
+                        customValues.push({
+                            name: input.name,
+                            value: input.checked
+                        });
+                    });
+
                     return {
                         duration: $(html).find("#craftDuration")[0].value,
                         overtime: Number($(html).find("#overtimePenalty")[0].value) || 0,
                         payMethod: $(html).find("#payMethod")[0].value,
-                        spendingAmount: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value)
+                        spendingAmount: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value),
+                        customValues
                     };
                 }
             },
@@ -189,7 +296,7 @@ export async function projectCraftDialog(actor, itemDetails) {
             content
                 .querySelector("[id=craftDuration]")
                 .addEventListener("change", (event) => {
-                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).copperValue);
+                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).scale(spendingLimitMultiplier).copperValue);
                     $(event.target).parent().parent().find("[id=maxCost]").html(maxCost.toString());
 
                     event.target.parentElement.parentElement.querySelector("#spendingAmount").dispatchEvent(new Event("keyup"));
@@ -215,6 +322,8 @@ export async function projectCraftDialog(actor, itemDetails) {
                         form.find("[id=spanOverspending]").attr("hidden", true);
                     }
                 });
+
+            extraRender.forEach((renderCommand) => renderCommand(content));
 
             const maxCost = spendingLimit("Hour", actor.level).scale(itemDetails.batchSize);
             content

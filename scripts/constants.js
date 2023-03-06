@@ -51,3 +51,15 @@ export function spendingLimit(spendingLimitDuration, level) {
             return new game.pf2e.Coins();
     }
 }
+
+/**
+ * Checks if an actor has a feat.
+ * 
+ * @param {ActorPF2e} actor The actor whose feats to check.
+ * @param {string} slug The slug of the feat to check. 
+ * Also checks for a sluggified name because most Heroic Crafting feats have no slugs.
+ * @returns {boolean} True if the feat exists. 
+ */
+export function CheckFeat(actor, slug) {
+    return actor.itemTypes.feat.some((i) => i.slug === slug || game.pf2e.system.sluggify(i.name) === slug);
+}

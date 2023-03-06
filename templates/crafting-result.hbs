@@ -1,9 +1,9 @@
-<div class="pf2e chat-card" data-heroic-crafting-progress="{{progressCost}}" data-project-uuid="{{projectUuid}}", data-actor="{{actor}}">
+<div class="pf2e chat-card" data-heroic-crafting-progress="{{progressString}}" data-project-uuid="{{projectUuid}}", data-actor="{{actor}}">
     <div class="card-buttons">
         {{#if progress}}
-            <button type="button" data-action="progress-heroic-crafting-project" class="heroic-crafting-chat-button">Progress project's Current Value by {{progressCost}}</button>
+            <button type="button" data-action="progress-heroic-crafting-project" class="heroic-crafting-chat-button">Progress project's Current Value by {{progressString}}</button>
         {{else}}
-            <button type="button" data-action="ruin-heroic-crafting-project" class="heroic-crafting-chat-button">Deduct {{progressCost}} from project's Current Value</button>
+            <button type="button" data-action="ruin-heroic-crafting-project" class="heroic-crafting-chat-button">Deduct {{progressString}} from project's Current Value</button>
         {{/if}}
     </div>
 </div>
