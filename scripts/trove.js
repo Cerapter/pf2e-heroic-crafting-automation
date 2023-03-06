@@ -154,7 +154,7 @@ export function payWithCoinsAndTrove(paymentOption, actorCoins, troves, costCoin
                     const canPayTrove = payWithTroves(troves, payment);
                     canPay = canPayTrove.canPay;
                     troveUpdates = canPayTrove.updates;
-                    removeCopper = canPay ? costCoins.copperValue : 0;
+                    removeCopper = actorCoins.copperValue;
                 }
             }
             break;
