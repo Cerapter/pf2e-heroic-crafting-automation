@@ -5,7 +5,7 @@ import { normaliseCoins } from "./coins.js";
  *
  * **WARNING!** If this changes, you HAVE to change the Material Trove and the macros too.
  */
-export const MODULE_NAME = "pf2e-heroic-crafting";
+export const MODULE_NAME = "pf2e-heroic-crafting-automation";
 
 /** 
  * The Spending Limit table's Hour column. Note that THAT table starts at level 1, but arrays obviously start at 0. 

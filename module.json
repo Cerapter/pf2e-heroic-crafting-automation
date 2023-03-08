@@ -1,7 +1,10 @@
 {
-    "id": "pf2e-heroic-crafting",
+    "id": "pf2e-heroic-crafting-automation",
     "title": "PF2e Heroic Crafting Automation",
-    "description": "Companion Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio, supplying only automation.",
+    "description": "Companion Foundry module based on the 3rd party supplement of the same name made by the peeps at Hive Frog Studio, supplying automation that works alongside their module.",
+    "url": "https://github.com/Cerapter/pf2e-heroic-crafting-automation",
+    "manifest": "https://raw.githubusercontent.com/Cerapter/pf2e-heroic-crafting-automation/master/module.json",
+    "download": "https://github.com/Cerapter/pf2e-heroic-crafting-automation/raw/v1.0/main.zip",
     "version": "1.0",
     "authors": [
         {
