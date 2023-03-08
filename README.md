@@ -5,8 +5,6 @@ A companion module for the [Heroic Crafting](https://foundryvtt.com/packages/her
 [**Check out the original Pathfinder Infinite product here!**](https://www.pathfinderinfinite.com/product/389992/Heroic-Crafting?src=ceraptor-module)
 
 ## Features
-
-https://github.com/Cerapter/pf2e-heroic-crafting-automation/blob/master
 ### Beginning and Crafting Projects
 
 The module introduces a new interface in the Crafting tab on the Player Character sheets where the player can keep track of their projects.
