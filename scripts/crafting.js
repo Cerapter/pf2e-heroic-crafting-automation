@@ -1,4 +1,4 @@
-import { MODULE_NAME, spendingLimit } from "./constants.js";
+import { getPreferredPayMethod, MODULE_NAME, setPreferredPayMethod, spendingLimit } from "./constants.js";
 import { projectBeginDialog, projectCraftDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
@@ -28,7 +28,7 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
 
     let dialogResult = {};
     if (!skipDialog) {
-        dialogResult = await projectBeginDialog(itemDetails);
+        dialogResult = await projectBeginDialog(itemDetails, getPreferredPayMethod(crafterActor));
     } else {
         dialogResult = { startingProgress: 0 };
     }
@@ -42,6 +42,9 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
         crafterActor.inventory.coins,
         getTroves(crafterActor),
         new game.pf2e.Coins({ cp: dialogResult.startingProgress }));
+
+
+    await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
     if (!payment.canPay) {
         ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
@@ -73,6 +76,7 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
         content: `<strong>${crafterActor.name}</strong> starts a project of <strong>${(await fromUuid(itemDetails.UUID)).name}</strong> with the Current Value of ${normaliseCoins(dialogResult.startingProgress)}.`,
         speaker: { alias: crafterActor.name },
     });
+
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.concat(newProjects) });
 };
 
@@ -122,6 +126,8 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         crafterActor.inventory.coins,
         getTroves(crafterActor),
         dialogResult.spendingAmount.scale(rushCostDoubling));
+
+    await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
     if (!payment.canPay) {
         ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);

@@ -63,3 +63,23 @@ export function spendingLimit(spendingLimitDuration, level) {
 export function CheckFeat(actor, slug) {
     return actor.itemTypes.feat.some((i) => i.slug === slug || game.pf2e.system.sluggify(i.name) === slug);
 }
+
+/**
+ * Gets the preferred pay method of an actor.
+ * 
+ * @param {ActorPF2e} actor The actor whose preferred pay method to check.
+ * @returns {"fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} The preferred pay method.
+ */
+export function getPreferredPayMethod(actor) {
+    return actor.getFlag(MODULE_NAME, "preferredPayMethod") ?? "fullCoin";
+}
+
+/**
+ * Sets the preferred pay method of an actor.
+ * 
+ * @param {ActorPF2e} actor The actor whose preferred pay method to set. 
+ * @param {"fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} preferredPayMethod The preferred pay method.
+ */
+export async function setPreferredPayMethod(actor, preferredPayMethod = "fullCoin") {
+    await actor.update({ [`flags.${MODULE_NAME}.preferredPayMethod`]: preferredPayMethod });
+}

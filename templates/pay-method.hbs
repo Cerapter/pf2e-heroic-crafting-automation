@@ -1,0 +1,10 @@
+{{log @root}}
+
+<div class="form-group">
+    <label for="payMethod">Pay Method:</label>
+    <select id="payMethod" name="payMethod">
+        {{#each paymentOptions}}
+            <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.text}}</option>
+        {{/each}}
+    </select>
+</div>

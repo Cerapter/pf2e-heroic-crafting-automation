@@ -1,17 +1,23 @@
 import { normaliseCoins, subtractCoins } from "./coins.js";
-import { CheckFeat, spendingLimit } from "./constants.js";
+import { CheckFeat, getPreferredPayMethod, MODULE_NAME, spendingLimit } from "./constants.js";
 
-/** A quick HTML piece for the whole prefer coins / prefer trove thing. @see payWithCoinsAndTrove() */
-const paymentOptionHtml = `<div class="form-group">
-    <label for="payMethod">Pay Method:</label>
-    <select id="payMethod" name="payMethod">
-        <option value="fullCoin" selected>Coins only</option>
-        <option value="preferCoin">Coins, then Troves</option>
-        <option value="preferTrove">Troves, then coins</option>
-        <option value="fullTrove">Material Troves only</option>
-        <option value="free">Free</option>
-    </select>
-</div>`;
+/**
+ * Generates a form group HTML for choosing a paying method (for beginning or crafting projets).
+ * 
+ * @param {"fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} preferredDefault One of the potential pay methods.
+ * @returns {string} The generated form group HTML.
+ */
+async function getPaymentOptionHTML(preferredDefault = "fullCoin") {
+    const paymentOptions = [
+        { id: "fullCoin", text: "Coins only", selected: preferredDefault === "fullCoin" },
+        { id: "preferCoin", text: "Coins, then Troves", selected: preferredDefault === "preferCoin" },
+        { id: "preferTrove", text: "Troves, then coins", selected: preferredDefault === "preferTrove" },
+        { id: "fullTrove", text: "Material Troves only", selected: preferredDefault === "fullTrove" },
+        { id: "free", text: "Free", selected: preferredDefault === "free" },
+    ];
+
+    return await renderTemplate(`modules/${MODULE_NAME}/templates/pay-method.hbs`, { paymentOptions });
+}
 
 /**
  * Creates a dialog 
@@ -21,6 +27,7 @@ const paymentOptionHtml = `<div class="form-group">
  * @param {number} itemDetails.batchSize The size of the batch of the item being crafted.
  * Usually 1, 4 or 10, but feats can change this.
  * @param {number} itemDetails.DC The crafting DC of the item.
+ * @param {"fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} preferredPayMethod The preferred pay method of the crafter.
  * @returns {{startingProgress: game.pf2e.Coins, 
  * payMethod: "fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free"} | "cancel"} 
  * An anonymous struct of two values.  
@@ -29,7 +36,7 @@ const paymentOptionHtml = `<div class="form-group">
  * 
  * Alternatively, the dialog can return "cancel" if the user pressed the Cancel button.
  */
-export async function projectBeginDialog(itemDetails) {
+export async function projectBeginDialog(itemDetails, preferredPayMethod = "fullCoin") {
     const item = await fromUuid(itemDetails.UUID);
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
 
@@ -52,7 +59,7 @@ export async function projectBeginDialog(itemDetails) {
                         <label for="spendingAmount">Spent Materials:</label>
                         <input type="text" id="spendingAmount" name="spendingAmount" placeholder="0 gp">
                     </div>
-                    ${paymentOptionHtml}
+                    ${await getPaymentOptionHTML(preferredPayMethod)}
                 </form>
             `,
         buttons: {
@@ -253,7 +260,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                             <option value=-10>-10</option>
                         </select>
                     </div>
-                    ${paymentOptionHtml}
+                    ${await getPaymentOptionHTML(getPreferredPayMethod(actor))}
                     ${extraHTML.join('\n')}
                 </form>
             `,
