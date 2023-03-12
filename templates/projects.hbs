@@ -1,11 +1,11 @@
-<li class="known-formulas item-container" data-container-type="heroicCraftingProjects">
+<li class="known-formulas item-container" data-container-type="heroicCraftingProjects" id="heroic-crafting-projects">
     <div class="action-header">
         <h3 class="item-name hide-container-toggle title">
             Projects
         </h3>
     </div>
     <ol class="directory-list item-list formula-list">
-        <li class="formula-level-header formula-header">
+        <li class="formula-level-header formula-header heroic-project-header">
             <div class="level-name flexrow">
                 <h3>Name</h3>
             </div>
@@ -20,7 +20,7 @@
             </div>
         </li>
         {{#each projects as |project|}}
-            <li class="item formula-item" data-formula-lvl="{{lvl}}" data-project-id="{{project.projectUuid}}" data-item-id="{{project.itemUuid}}" data-is-formula="true">
+            <li class="item formula-item heroic-project-item" data-formula-lvl="{{lvl}}" data-project-id="{{project.projectUuid}}" data-item-id="{{project.itemUuid}}" data-is-formula="true">
                 <div class="item-name rollable">
                     <div class="item-image">
                         <img class="item-icon" src="{{project.img}}" alt="{{project.name}}">
