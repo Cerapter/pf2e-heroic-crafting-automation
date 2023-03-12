@@ -341,6 +341,17 @@ export async function projectCraftDialog(actor, itemDetails) {
     });
 }
 
+/**
+ * Edits a project.
+ * 
+ * @param {Object} projectDetails The project being edit.
+ * @param {string} projectDetails.ID The UUID of the project itself.
+ * @param {string} projectDetails.ItemUUID The UUID of the item specifically.
+ * @param {number} projectDetails.progressInCopper The current progress on the project, measured in copper.
+ * @param {number} projectDetails.batchSize The amount of items being made at once.
+ * Usually relevant for consumables more, and is 1 for permanent items. 
+ * @param {number} projectDetails.DC The Crafting DC of the project. 
+ */
 export async function projectEditDialog(projectDetails) {
     const item = await fromUuid(projectDetails.ItemUUID);
 
