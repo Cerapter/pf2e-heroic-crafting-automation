@@ -403,3 +403,48 @@ export async function projectEditDialog(projectDetails) {
         default: "ok"
     }, { width: 350 });
 }
+
+/**
+ * Posts a project to chat.
+ * 
+ * @param {ActorPF2e} actor The actor whose project to display in chat. 
+ * @param {string} projectUUID The ID of the project.
+ */
+export async function projectToChat(actor, projectUUID) {
+    if (!projectUUID || projectUUID === "") {
+        console.error("[HEROIC CRAFTING] Missing Project UUID when posting to chat!");
+        return;
+    }
+
+    const actorProjects = actor.getFlag(MODULE_NAME, "projects") ?? [];
+    const project = actorProjects.filter(project => project.ID === projectUUID)[0];
+
+    if (!project) {
+        ui.notifications.error(`${actor.name} does not have project ${projectUUID} to post to chat!`);
+        return;
+    }
+
+    const item = await fromUuid(project.ItemUUID);
+    const currentValue = normaliseCoins(project.progressInCopper);
+    const price = game.pf2e.Coins.fromPrice(item.price, project.batchSize);
+
+    const projectDetails = {
+        UUID: project.ID,
+        actorID: actor.id,
+        itemID: project.ItemUUID,
+        itemImg: item.img,
+        itemName: item.name,
+        itemDesc: item.description,
+        DC: project.DC,
+        batchSize: project.batchSize,
+        currentValue: currentValue.toString(),
+        price: price.toString(),
+        completion: `${Math.floor(currentValue.copperValue / price.copperValue * 100)}%`
+    }
+
+    ChatMessage.create({
+        user: game.user.id,
+        content: await renderTemplate(`modules/${MODULE_NAME}/templates/project-card.hbs`, projectDetails),
+        speaker: { alias: actor.name },
+    });
+}

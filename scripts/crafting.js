@@ -95,14 +95,23 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
  * @param {number} itemDetails.batchSize The size of the batch of the item being crafted. 
  * @param {boolean} skipDialog Defaults to true. 
  * Despite that, it's currently unused, and is always called with a false instead.
+ * @param {ActorPF2e} projectOwner Who actually owns the project. Defaults to crafterActor, but can be someone else (with crafting as a group). 
  */
-export async function craftAProject(crafterActor, itemDetails, skipDialog = true) {
+export async function craftAProject(crafterActor, itemDetails, skipDialog = true, projectOwner = crafterActor) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
         console.error("[HEROIC CRAFTING] Missing Item UUID when crafting a project!");
         return;
     }
     if (!itemDetails.projectUUID || itemDetails.projectUUID === "") {
         console.error("[HEROIC CRAFTING] Missing Project UUID when crafting a project!");
+        return;
+    }
+
+    const actorProjects = projectOwner.getFlag(MODULE_NAME, "projects") ?? [];
+    const project = actorProjects.filter(project => project.ID === itemDetails.projectUUID)[0];
+
+    if (!project) {
+        ui.notifications.error(`${projectOwner.name} does not have project ${itemDetails.projectUUID} to craft!`);
         return;
     }
 
@@ -146,8 +155,6 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         await crafterActor.updateEmbeddedDocuments("Item", payment.troveUpdates);
     }
 
-    const project = crafterActor.getFlag(MODULE_NAME, "projects").filter(project => project.ID === itemDetails.projectUUID)[0];
-
     const projectItem = await fromUuid(project.ItemUUID);
     const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
 
@@ -157,9 +164,9 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
             content: `<strong>${crafterActor.name}</strong> skips the Craft check for <strong>${projectItem.name}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.`,
             speaker: { alias: crafterActor.name },
         });
-        progressProject(crafterActor, project.ID, true, dialogResult.spendingAmount);
+        progressProject(projectOwner, project.ID, true, dialogResult.spendingAmount);
     } else {
-        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, customValues: dialogResult.customValues });
+        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, customValues: dialogResult.customValues, projectOwner });
     }
 };
 
@@ -191,6 +198,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * The progress made is based on this.
  * @param {{name: string, value: boolean}[]} details.customValues An array of name-value pairs that modify the craft
  * check somehow.
+ * @param {ActorPF2e} details.projectOwner The actor who owns the project. Usually the same as the crafterActor, but not always! 
  */
 function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
@@ -283,8 +291,8 @@ function rollCraftAProject(crafterActor, project, details) {
                     progress: false,
                     progressCost: new game.pf2e.Coins(),
                     progressString: "0 gp",
-                    projectUuid: project.ID, actor:
-                        crafterActor.id
+                    projectUuid: project.ID,
+                    actor: details.projectOwner.id
                 };
 
                 if (outcome === "success" || outcome === "criticalSuccess") {
@@ -470,19 +478,28 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
             const itemObject = projectItem.toObject();
             itemObject.system.quantity = project.batchSize;
 
-            const result = await crafterActor.addToInventory(itemObject, undefined);
+            const result = crafterActor.isOwner ? await crafterActor.addToInventory(itemObject, undefined) : "permissionLacking";
+            console.log(result);
 
             if (!result) {
                 ui.notifications.warn(game.i18n.localize("PF2E.Actions.Craft.Warning.CantAddItem"));
                 return;
             }
 
-            ChatMessage.create({
-                user: game.user.id,
-                content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).`,
-                speaker: { alias: crafterActor.name },
-            });
-            await abandonProject(crafterActor, projectUUID);
+            if (result === "permissionLacking") {
+                ChatMessage.create({
+                    user: game.user.id,
+                    content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to ${crafterActor.name}, as ${game.user.name} does not have permissions to edit said actor.`,
+                    speaker: { alias: crafterActor.name },
+                });
+            } else {
+                ChatMessage.create({
+                    user: game.user.id,
+                    content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).`,
+                    speaker: { alias: crafterActor.name },
+                });
+                await abandonProject(crafterActor, projectUUID);
+            }
         } else {
             ChatMessage.create({
                 user: game.user.id,

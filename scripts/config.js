@@ -2,6 +2,7 @@ import { HeroicCraftingHourlySpendingLimit, HeroicCraftingGatheredIncome, spendi
 import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject, editProject } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
+import { projectToChat } from "./dialog.js";
 
 /// Exposes the various functions and constants for usage in macros.
 Hooks.on(
@@ -86,12 +87,22 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
             await craftAProject(data.actor, itemDetails, false);
         });
     }
+    {
+        //! Add "rollable" to-chat button
+        const projects = craftingTab.find("[data-container-type=heroicCraftingProjects]").find(".formula-item");
+
+        projects.find(".rollable").on("click", async (event) => {
+            const projectUUID = $(event.currentTarget).parent().attr("data-project-id") || "";
+
+            await projectToChat(data.actor, projectUUID);
+        });
+    }
 })
 
 /// Used for the crafting message to make the progress / deduction button 
 /// add / remove Current Value from a character's project.
 Hooks.on("renderChatMessage", async (data, html) => {
-    html.find(".card-buttons .heroic-crafting-chat-button").on("click", async (event) => {
+    html.find(".card-buttons .heroic-crafting-progress-chat-button").on("click", async (event) => {
         event.preventDefault();
 
         const button = $(event.currentTarget);
@@ -101,7 +112,6 @@ Hooks.on("renderChatMessage", async (data, html) => {
             button.parent().parent().attr("data-project-uuid"),
             button.parent().parent().attr("data-actor")
         ];
-
         const actor = game.actors.get(actorID);
 
         if (!actor) return;
@@ -110,5 +120,25 @@ Hooks.on("renderChatMessage", async (data, html) => {
         progressProject(actor, uuid, progress, game.pf2e.Coins.fromString(amount));
 
         button.attr("disabled", "true");
+    });
+
+
+    html.find(".card-buttons .heroic-crafting-craft-chat-button").on("click", async (event) => {
+        event.preventDefault();
+
+        const button = $(event.currentTarget);
+        const actorID = button.parent().parent().attr("data-actor-id");
+
+        const itemDetails = {
+            UUID: button.attr("data-item-id"),
+            projectUUID: button.parent().parent().attr("data-project-id"),
+            batchSize: button.attr("data-batch-size"),
+        };
+
+        const actor = game.actors.get(actorID);
+        if (!actor) return;
+        if (!game.user.character) return;
+
+        await craftAProject(game.user.character, itemDetails, false, actor);
     });
 })

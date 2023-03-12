@@ -1,0 +1,26 @@
+<div class="pf2e chat-card weapon-card" data-actor-id="{{actorID}}" data-project-id="{{UUID}}">
+    <header class="card-header flexrow">
+        <img src="{{itemImg}}" title="Project ({{itemName}})" />
+        <h3>Project ({{itemName}})</h3>
+    </header>
+
+    <div class="card-content">
+        {{{itemDesc}}}
+    </div>
+
+    <div class="card-content">
+        This is a project to craft the item above.
+    </div>
+    
+    <div class="card-buttons">
+        <button type="button" data-action="craft-others-project" data-item-id="{{itemID}}" data-batch-size="{{batchSize}}" class="heroic-crafting-craft-chat-button">Craft</button>
+    </div>
+
+    <footer class="card-footer">
+        <span>DC: {{DC}}</span>
+        <span>Batch Size: {{batchSize}}</span>
+        <span>Current Value: {{currentValue}}</span>
+        <span>Price: {{price}}</span>
+        <span>Completion: {{completion}}</span>
+    </footer>
+</div>
