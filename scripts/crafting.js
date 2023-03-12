@@ -117,6 +117,11 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         return;
     }
 
+    if (dialogResult.spendingAmount.copperValue === 0) {
+        ui.notifications.info(`Please input a meaningful cost (> 0 cp) for Craft a Project!`);
+        return;
+    }
+
     // TODO: Kinda hardcoded?
     const rushCostDoubling = dialogResult.customValues.some((i) => i.name === "midnightCrafting" && i.value === true) ? 2 : 1;
     console.log(rushCostDoubling);
