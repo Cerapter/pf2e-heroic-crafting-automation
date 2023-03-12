@@ -340,3 +340,55 @@ export async function projectCraftDialog(actor, itemDetails) {
         },
     });
 }
+
+export async function projectEditDialog(projectDetails) {
+    const item = await fromUuid(projectDetails.ItemUUID);
+
+
+    return await Dialog.wait({
+        title: "Edit Project Details",
+        content: `
+                <form>
+                    <body>
+                        <section>
+                            <h1>Edit Project Details</h1>
+                        </section>
+                        <section>
+                            <span>Current Project:</span> <strong>${item.name}</strong>
+                        </section>
+                    </body>
+                    <div class="form-group">
+                        <label for="currentProgress">Current Progress:</label>
+                        <input type="text" id="currentProgress" name="currentProgress" placeholder="0 gp" value="${normaliseCoins(projectDetails.progressInCopper).toString()}">
+                    </div>
+                    <div class="form-group">
+                        <label for="DC">DC:</label>
+                        <input type="number" name="DC" id="DC" value=${projectDetails.DC} min=0 step=1>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchSize">Batch size:</label>
+                        <input type="number" name="batchSize" id="batchSize" value=${projectDetails.batchSize} min=1 step=1>
+                    </div>
+                </form>
+            `,
+        buttons: {
+            ok: {
+                label: "Confirm Changes",
+                icon: "<i class='fas fa-edit fa-1x fa-fw'></i>",
+                callback: (html) => {
+
+                    return {
+                        progressInCopper: game.pf2e.Coins.fromString($(html).find("#currentProgress")[0].value).copperValue || -1,
+                        DC: Number($(html).find("#DC")[0].value) || -1,
+                        batchSize: Number($(html).find("#batchSize")[0].value) || -1,
+                    };
+                }
+            },
+            cancel: {
+                label: "Cancel",
+                icon: "<i class='fa-solid fa-ban'></i>",
+            }
+        },
+        default: "ok"
+    }, { width: 350 });
+}

@@ -1,5 +1,5 @@
 import { getPreferredPayMethod, MODULE_NAME, setPreferredPayMethod, spendingLimit } from "./constants.js";
-import { projectBeginDialog, projectCraftDialog } from "./dialog.js";
+import { projectBeginDialog, projectCraftDialog, projectEditDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
 import { extractDegreeOfSuccessAdjustments, extractRollTwice, extractRollSubstitutions } from "./system.js";
@@ -124,7 +124,6 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
 
     // TODO: Kinda hardcoded?
     const rushCostDoubling = dialogResult.customValues.some((i) => i.name === "midnightCrafting" && i.value === true) ? 2 : 1;
-    console.log(rushCostDoubling);
 
     const payment = payWithCoinsAndTrove(
         dialogResult.payMethod,
@@ -328,9 +327,6 @@ function rollCraftAProject(crafterActor, project, details) {
 
                 craftDetails.progressString = craftDetails.progressCost.toString();
 
-                console.log(details.customValues);
-                console.log(craftDetails);
-
                 const flavour = await renderTemplate(`modules/${MODULE_NAME}/templates/crafting-result.hbs`, craftDetails);
                 message.updateSource({ flavor: message.flavor + flavour });
                 ChatMessage.create(message.toObject());
@@ -348,6 +344,47 @@ function rollCraftAProject(crafterActor, project, details) {
 export async function abandonProject(crafterActor, projectUUID) {
     const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
     await crafterActor.update({ [`flags.${MODULE_NAME}.projects`]: actorProjects.filter(project => project.ID !== projectUUID) });
+}
+
+/**
+ * Edits an actor's project.
+ * 
+ * @param {ActorPF2e} crafterActor The actor whose project to edit. 
+ * @param {string} projectUUID The UUID of the project to edit. 
+ */
+export async function editProject(crafterActor, projectUUID) {
+    if (!projectUUID || projectUUID === "") {
+        console.error("[HEROIC CRAFTING] Missing Project UUID when editing a project!");
+        return;
+    }
+
+    const actorProjects = crafterActor.getFlag(MODULE_NAME, "projects") ?? [];
+    const project = actorProjects.filter(project => project.ID === projectUUID)[0];
+
+    if (!project) {
+        ui.notifications.error(`${crafterActor.name} does not have project ${projectUUID} to edit!`);
+        return;
+    }
+
+    const dialogResult = await projectEditDialog(project);
+
+    if (!dialogResult || dialogResult === "cancel") {
+        return;
+    }
+
+    project.progressInCopper = dialogResult.progressInCopper < 0 ? project.progressInCopper : dialogResult.progressInCopper;
+    project.DC = dialogResult.DC < 0 ? project.DC : dialogResult.DC;
+    project.batchSize = dialogResult.batchSize <= 0 ? project.batchSize : dialogResult.batchSize;
+
+    await crafterActor.update({
+        [`flags.${MODULE_NAME}.projects`]: actorProjects.map((currProject => {
+            if (currProject.ID !== projectUUID) {
+                return currProject;
+            } else {
+                return project;
+            }
+        }))
+    });
 }
 
 /**

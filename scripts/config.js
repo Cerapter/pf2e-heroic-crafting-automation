@@ -1,5 +1,5 @@
 import { HeroicCraftingHourlySpendingLimit, HeroicCraftingGatheredIncome, spendingLimit, MODULE_NAME } from "./constants.js";
-import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject } from "./crafting.js";
+import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject, editProject } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 
@@ -64,6 +64,12 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
 
             await abandonProject(data.actor, UUID);
+        });
+
+        projectControls.find("a[data-action=project-edit]").on("click", async (event) => {
+            const UUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
+
+            await editProject(data.actor, UUID);
         });
 
         projectControls.find("a[data-action=project-craft]").on("click", async (event) => {
