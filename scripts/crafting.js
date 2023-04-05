@@ -205,6 +205,10 @@ function rollCraftAProject(crafterActor, project, details) {
     let skillKey = "cra";
 
     if (details.customValues.some((i) => i.name === "naturalBornTinker" && i.value === true)) {
+        skillKey = "sur";
+    }
+
+    if (details.customValues.some((i) => i.name === "herbalistDed" && i.value === true)) {
         skillKey = "nat";
     }
 

@@ -189,6 +189,23 @@ export async function projectCraftDialog(actor, itemDetails) {
         `);
     }
 
+    if (CheckFeat(actor, "herbalist-dedication")) {
+        const isHerbal = (
+            item.system.traits.otherTags.includes("herbal") ||
+            (item.system.traits.value.includes("alchemical") && item.system.traits.value.includes("healing"))
+        );
+
+        const extraHint = isHerbal ? `Note: Current item <b>IS</b> herbal.` : `Note: Current item <b>IS NOT</b> herbal.`;
+
+        extraHTML.push(`
+        <div class="form-group extra-craft-modifiers">
+            <label for="herbalistDed">Herbalist:</label>
+            <input type="checkbox" id="herbalistDed" name="herbalistDed">
+        </div>
+        <p class="notes">Craft with Nature instead of Crafting?<br>${extraHint}</p>
+        `);
+    }
+
     if (CheckFeat(actor, "efficient-crafting")) {
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
