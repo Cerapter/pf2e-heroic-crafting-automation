@@ -37,16 +37,19 @@ export function spendingLimit(spendingLimitDuration, level) {
 
     let hourlyLimit = game.pf2e.Coins.fromString(HeroicCraftingHourlySpendingLimit[level - 1]);
 
+    const dayMultiplier = game.settings.get(MODULE_NAME, "hoursInADay") || 4;
+    const weekMultiplier = game.settings.get(MODULE_NAME, "daysInAWeek") || 5;
+
     switch (spendingLimitDuration) {
         case "Hour":
         case "hour":
             return hourlyLimit;
         case "Day":
         case "day":
-            return normaliseCoins(hourlyLimit.scale(4).copperValue);
+            return normaliseCoins(hourlyLimit.scale(dayMultiplier).copperValue);
         case "Week":
         case "week":
-            return normaliseCoins(hourlyLimit.scale(20).copperValue);
+            return normaliseCoins(hourlyLimit.scale(dayMultiplier).scale(weekMultiplier).copperValue);
         default:
             return new game.pf2e.Coins();
     }

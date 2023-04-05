@@ -8,6 +8,24 @@ import { projectToChat } from "./dialog.js";
 Hooks.on(
     "init",
     () => {
+        game.settings.register(MODULE_NAME, "hoursInADay", {
+            name: "Hours in a Day",
+            hint: "The amount of hours you can spend crafting in a day before incurring penalties due to Working Overtime.",
+            scope: "world",
+            config: true,
+            default: 4,
+            type: Number,
+        });
+
+        game.settings.register(MODULE_NAME, "daysInAWeek", {
+            name: "Days in a Week",
+            hint: "The amount of days a week is used as a shorthand for for spending limit purposes, and implicitly also the amount of days in a week you can craft without Working Overtime.",
+            scope: "world",
+            config: true,
+            default: 5,
+            type: Number,
+        });
+
         game.pf2eHeroicCrafting = {
             HeroicCraftingHourlySpendingLimit,
             HeroicCraftingGatheredIncome,
