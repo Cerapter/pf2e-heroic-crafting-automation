@@ -2,7 +2,6 @@ import { getPreferredPayMethod, MODULE_NAME, setPreferredPayMethod, spendingLimi
 import { projectBeginDialog, projectCraftDialog, projectEditDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
-import { extractDegreeOfSuccessAdjustments, extractRollTwice, extractRollSubstitutions } from "./system.js";
 
 /**
  * Begins a new project for an actor, adding said project to the flags of the actor, 
@@ -202,34 +201,37 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  */
 function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
-    let skillKey = "cra";
+    let skillName = "crafting";
 
     if (details.customValues.some((i) => i.name === "naturalBornTinker" && i.value === true)) {
-        skillKey = "sur";
+        skillName = "survival";
     }
 
     if (details.customValues.some((i) => i.name === "herbalistDed" && i.value === true)) {
-        skillKey = "nat";
+        skillName = "nature";
     }
 
-    const skill = crafterActor.system.skills[skillKey];
-    const skillName = game.i18n.localize(CONFIG.PF2E.skills[skillKey]);
-    const proficiency = ["proficiency:untrained", "proficiency:trained", "proficiency:expert", "proficiency:master", "proficiency:legendary"]; // Reimplementing system functionality be like: 
+    const craftSkillCheck = crafterActor.skills[skillName].extend({
+        check: {
+            label: `${actionName}`
+        },
+        rollOptions: [`action:craft`, `action:craftproj`],
+        slug: "action-craft-a-project"
+    });
+
     const modifiers = [];
     const traits = [];
-    const notes = [...skill.notes];
-    const domains = ['all', 'skill-check', skillName.toLowerCase(), `${skill.ability}-based`, `${skill.ability}-skill-check`];
-
+    const extraRollNotes = [];
     {
-        notes.push({
+        extraRollNotes.push({
             "outcome": ["success", "criticalSuccess"],
             "text": "<p><strong>Sucess</strong> You work productively during this period. Add double this activity's Cost to the project's Current Value.</p>"
         });
-        notes.push({
+        extraRollNotes.push({
             "outcome": ["failure"],
             "text": "<p><strong>Failure</strong> You work unproductively during this period. Add half this activity's Cost to the project's Current Value.</p>"
         });
-        notes.push({
+        extraRollNotes.push({
             "outcome": ["criticalFailure"],
             "text": "<p><strong>Critical Failure</strong> You ruin your materials and suffer a setback while crafting. Deduct this activity's Cost from the project's Current Value. If this reduces the project's Current Value below 0, the project is ruined and must be started again.</p>"
         });
@@ -254,12 +256,6 @@ function rollCraftAProject(crafterActor, project, details) {
             .forEach(traitObject => traits.push(traitObject));
     }
 
-    const options = crafterActor.getRollOptions(domains);
-    options.push(`action:craft`, `action:craftproj`, `skill:rank:${skill.rank}`, proficiency[skill.rank]);
-    const rollTwice = extractRollTwice(crafterActor.synthetics.rollTwice, domains, options);
-    const substitutions = extractRollSubstitutions(crafterActor.synthetics.rollSubstitutions, domains, options);
-    const dosAdjustments = extractDegreeOfSuccessAdjustments(crafterActor.synthetics, domains);
-
     if (details.overtime != 0) {
         modifiers.push(new game.pf2e.Modifier({
             label: "Overtime",
@@ -268,28 +264,15 @@ function rollCraftAProject(crafterActor, project, details) {
         }));
     }
 
-    game.pf2e.Check.roll(
-        new game.pf2e.CheckModifier(
-            `${actionName}`,
-            crafterActor.system.skills[skillKey], modifiers),
-        {
-            actor: crafterActor,
-            type: 'skill-check',
-            options,
-            domains,
-            rollTwice,
-            substitutions,
-            dosAdjustments,
-            createMessage: false,
-            notes,
-            dc: {
-                value: project.DC,
-                visible: true
-            },
-            traits
+    craftSkillCheck.roll({
+        dc: {
+            value: project.DC,
+            visible: true
         },
-        event,
-        async (roll, outcome, message) => {
+        extraRollNotes,
+        createMessage: false,
+        traits,
+        [`callback`]: async (roll, outcome, message, event) => {
             if (message instanceof ChatMessage) {
                 let craftDetails = {
                     progress: false,
@@ -344,6 +327,7 @@ function rollCraftAProject(crafterActor, project, details) {
                 ChatMessage.create(message.toObject());
             }
         }
+    }
     );
 }
 
