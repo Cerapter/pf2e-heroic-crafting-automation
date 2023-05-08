@@ -1,5 +1,5 @@
 import { normaliseCoins, subtractCoins } from "./coins.js";
-import { CheckFeat, getPreferredPayMethod, MODULE_NAME, spendingLimit } from "./constants.js";
+import { CheckFeat, getPreferredPayMethod, localise, MODULE_NAME, spendingLimit } from "./constants.js";
 
 /**
  * Generates a form group HTML for choosing a paying method (for beginning or crafting projets).
@@ -9,11 +9,11 @@ import { CheckFeat, getPreferredPayMethod, MODULE_NAME, spendingLimit } from "./
  */
 async function getPaymentOptionHTML(preferredDefault = "fullCoin") {
     const paymentOptions = [
-        { id: "fullCoin", text: "Coins only", selected: preferredDefault === "fullCoin" },
-        { id: "preferCoin", text: "Coins, then Troves", selected: preferredDefault === "preferCoin" },
-        { id: "preferTrove", text: "Troves, then coins", selected: preferredDefault === "preferTrove" },
-        { id: "fullTrove", text: "Material Troves only", selected: preferredDefault === "fullTrove" },
-        { id: "free", text: "Free", selected: preferredDefault === "free" },
+        { id: "fullCoin", text: localise("ProjectManagement.FullCoin"), selected: preferredDefault === "fullCoin" },
+        { id: "preferCoin", text: localise("ProjectManagement.PreferCoin"), selected: preferredDefault === "preferCoin" },
+        { id: "preferTrove", text: localise("ProjectManagement.PreferTrove"), selected: preferredDefault === "preferTrove" },
+        { id: "fullTrove", text: localise("ProjectManagement.FullTrove"), selected: preferredDefault === "fullTrove" },
+        { id: "free", text: localise("ProjectManagement.Free"), selected: preferredDefault === "free" },
     ];
 
     return await renderTemplate(`modules/${MODULE_NAME}/templates/pay-method.hbs`, { paymentOptions });
@@ -41,22 +41,22 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
 
     return await Dialog.wait({
-        title: "Begin A Project",
+        title: localise("ProjectBeginWindow.Title"),
         content: `
                 <form>
                     <body>
                         <section>
-                            <h1>Begin A Project</h1>
+                            <h1>${localise("ProjectBeginWindow.Title")}</h1>
                         </section>
                         <section>
-                            <span>Current Project:</span> <strong>${item.name}</strong>
+                            <span>${localise("ProjectManagement.CurrentProject")}</span> <strong>${item.name}</strong>
                         </section>
                         <section>
-                            Remaining Materials / Maximum Cost: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">OVERSPENDING!</strong></span>
+                            ${localise("ProjectManagement.RemainingMaterials")} / ${localise("ProjectManagement.MaximumCost")}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise("ProjectManagement.OverspendingWarning")}</strong></span>
                         </section>
                     </body>
                     <div class="form-group">
-                        <label for="spendingAmount">Spent Materials:</label>
+                        <label for="spendingAmount">${localise("ProjectManagement.SpentMaterialsSoFar")}</label>
                         <input type="text" id="spendingAmount" name="spendingAmount" placeholder="0 gp">
                     </div>
                     ${await getPaymentOptionHTML(preferredPayMethod)}
@@ -64,7 +64,7 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
             `,
         buttons: {
             ok: {
-                label: "Begin Project",
+                label: localise("ProjectBeginWindow.BeginProjectButton"),
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
                     return {
@@ -74,7 +74,7 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
                 }
             },
             cancel: {
-                label: "Cancel",
+                label: localise("ProjectBeginWindow.CancelButton"),
                 icon: "<i class='fa-solid fa-ban'></i>",
             }
         },
@@ -140,20 +140,20 @@ export async function projectCraftDialog(actor, itemDetails) {
     if (CheckFeat(actor, "hyperfocus")) {
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
-            <label for="hyperfocus">Hyperfocus:</label>
+            <label for="hyperfocus">${localise("HardcodedSupport.Hyperfocus.Name")}:</label>
             <input type="checkbox" id="hyperfocus" name="hyperfocus" checked disabled>
         </div>
-        <p class="notes">Applies while you have the feat. Make more progress on critical successes on a check to Craft a Project for at least a day.</p>
+        <p class="notes">${localise("HardcodedSupport.Hyperfocus.Desc")}</p>
         `)
     }
 
     if (CheckFeat(actor, "midnight-crafting")) {
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
-            <label for="midnightCrafting">Midnight Crafting:</label>
+            <label for="midnightCrafting">${localise("HardcodedSupport.MidnightCrafting.Name")}:</label>
             <input type="checkbox" id="midnightCrafting" name="midnightCrafting">
         </div>
-        <p class="notes" id="midnightCraftingNotes">Craft in 10 minutes. No rush surcharge.</p>
+        <p class="notes" id="midnightCraftingNotes">${localise("HardcodedSupport.MidnightCrafting.Desc")} ${localise("HardcodedSupport.MidnightCrafting.NoSurcharge")}}</p >
         `);
 
         extraRender.push(
@@ -164,9 +164,21 @@ export async function projectCraftDialog(actor, itemDetails) {
                         const rushCost = game.pf2e.Coins.fromString($(event.target).parent().parent().find("[id=spendingAmount]").val());
 
                         if (event.target.checked === true) {
-                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(`Craft in 10 minutes. Pay extra ${rushCost.toString()} in rush costs.`);
+                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(
+                                localise("HardcodedSupport.MidnightCrafting.Desc").concat(
+                                    " ",
+                                    localise("HardcodedSupport.MidnightCrafting.Surcharge", {
+                                        cost: rushCost.toString()
+                                    })
+                                )
+                            );
                         } else {
-                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(`Craft in 10 minutes. No rush surcharge.`);
+                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(
+                                localise("HardcodedSupport.MidnightCrafting.Desc").concat(
+                                    " ",
+                                    localise("HardcodedSupport.MidnightCrafting.NoSurcharge")
+                                )
+                            );
                         }
                     });
 
@@ -181,12 +193,12 @@ export async function projectCraftDialog(actor, itemDetails) {
 
     if (CheckFeat(actor, "natural-born-tinker")) {
         extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="naturalBornTinker">Natural-Born Tinker:</label>
+        <div class="form-group extra-craft-modifiers" >
+            <label for="naturalBornTinker">${localise("HardcodedSupport.NaturalBornTinker.Name")}:</label>
             <input type="checkbox" id="naturalBornTinker" name="naturalBornTinker">
         </div>
-        <p class="notes">Craft with Survival instead of Crafting?</p>
-        `);
+        <p class="notes">${localise("HardcodedSupport.NaturalBornTinker.Desc")}</p>
+    `);
     }
 
     if (CheckFeat(actor, "herbalist-dedication")) {
@@ -195,35 +207,37 @@ export async function projectCraftDialog(actor, itemDetails) {
             (item.system.traits.value.includes("alchemical") && item.system.traits.value.includes("healing"))
         );
 
-        const extraHint = isHerbal ? `Note: Current item <b>IS</b> herbal.` : `Note: Current item <b>IS NOT</b> herbal.`;
+        const extraHint = isHerbal ?
+            localise("HardcodedSupport.HerbalistDedication.CurrentItemIsHerbal") :
+            localise("HardcodedSupport.HerbalistDedication.CurrentItemIsNotHerbal");
 
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
-            <label for="herbalistDed">Herbalist:</label>
+            <label for="herbalistDed">${localise("HardcodedSupport.HerbalistDedication.Name")}:</label>
             <input type="checkbox" id="herbalistDed" name="herbalistDed">
         </div>
-        <p class="notes">Craft with Nature instead of Crafting?<br>${extraHint}</p>
-        `);
+        <p class="notes">${localise("HardcodedSupport.HerbalistDedication.Desc")}<br>${extraHint}</p>
+    `);
     }
 
     if (CheckFeat(actor, "efficient-crafting")) {
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
-            <label for="efficientCrafting">Efficient Crafting:</label>
+            <label for="efficientCrafting">${localise("HardcodedSupport.EfficientCrafting.Name")}:</label>
             <input type="checkbox" id="efficientCrafting" name="efficientCrafting">
         </div>
-        <p class="notes">Recover materials on a failure? (Check manually if applies!)</p>
-        `);
+        <p class="notes">${localise("HardcodedSupport.EfficientCrafting.Desc")}</p>
+    `);
     }
 
     if (CheckFeat(actor, "quick-crafting")) {
         extraHTML.push(`
         <div class="form-group extra-craft-modifiers">
-            <label for="quickCrafting">Quick Crafting:</label>
+            <label for="quickCrafting">${localise("HardcodedSupport.QuickCrafting.Name")}:</label>
             <input type="checkbox" id="quickCrafting" name="quickCrafting">
         </div>
-        <p class="notes">Double the spending limit?</p>
-        `);
+        <p class="notes">${localise("HardcodedSupport.QuickCrafting.Desc")}</p>
+    `);
 
         extraRender.push(
             (content) => {
@@ -243,47 +257,47 @@ export async function projectCraftDialog(actor, itemDetails) {
     }
 
     return await Dialog.wait({
-        title: "Craft A Project",
+        title: localise("CraftWindow.Title"),
         content: `
-                <form>
+        <form>
                     <body>
                         <section>
-                            <h1>Craft A Project</h1>
+                            <h1>${localise("CraftWindow.Title")}</h1>
                         </section>
                         <section>
-                            Current Project: <strong>${item.name}</strong>
+                            ${localise("ProjectManagement.CurrentProject")}: <strong>${item.name}</strong>
                         </section>
                         <section>
-                            Remaining Materials / Maximum Cost: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">OVERSPENDING!</strong></span>
+                        ${localise("ProjectManagement.RemainingMaterials")} / ${localise("ProjectManagement.MaximumCost")}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise("ProjectManagement.OverspendingWarning")}</strong></span>
                         </section>
                     </body>
                     <div class="form-group">
-                        <label for="spendingAmount">Spent Materials:</label>
+                        <label for="spendingAmount">${localise("ProjectManagement.SpentMaterialsSoFar")}</label>
                         <input type="text" id="spendingAmount" name="spendingAmount" placeholder="0 gp">
                     </div>
                     <div class="form-group">
-                        <label for="craftDuration">Crafting Duration:</label>
+                        <label for="craftDuration">${localise("CraftWindow.CraftingDuration.Title")}</label>
                         <select autofocus id="craftDuration" name="craftDuration">
-                            <option value="hour">Hour</option>
-                            <option value="day">Day</option>
-                            <option value="week">Week</option>
+                            <option value="hour">${localise("CraftWindow.CraftingDuration.Hour")}</option>
+                            <option value="day">${localise("CraftWindow.CraftingDuration.Day")}</option>
+                            <option value="week">${localise("CraftWindow.CraftingDuration.Week")}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="overtimePenalty">Overtime Penalty:</label>
+                        <label for="overtimePenalty">${localise("CraftWindow.OvertimePenalty.Title")}</label>
                         <select id="overtimePenalty" name="overtimePenalty">
-                            <option value=0>No overtime</option>
+                            <option value=0>${localise("CraftWindow.OvertimePenalty.NoOvertime")}</option>
                             <option value=-5>-5</option>
-                            <option value=-10>-10</option>
+                            <option value=-10> -10</option>
                         </select>
                     </div>
                     ${await getPaymentOptionHTML(getPreferredPayMethod(actor))}
                     ${extraHTML.join('\n')}
                 </form>
-            `,
+        `,
         buttons: {
             ok: {
-                label: "Craft Project",
+                label: localise("CraftWindow.CraftProjectButton"),
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
                     const customValues = [];
@@ -307,7 +321,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                 }
             },
             cancel: {
-                label: "Cancel",
+                label: localise("CraftWindow.CancelButton"),
                 icon: "<i class='fa-solid fa-ban'></i>",
                 callback: (html) => {
                     return {};
@@ -374,34 +388,34 @@ export async function projectEditDialog(projectDetails) {
 
 
     return await Dialog.wait({
-        title: "Edit Project Details",
+        title: localise("EditProjectWindow.Title"),
         content: `
-                <form>
+        <form>
                     <body>
                         <section>
-                            <h1>Edit Project Details</h1>
+                            <h1>${localise("EditProjectWindow.Title")}</h1>
                         </section>
                         <section>
-                            <span>Current Project:</span> <strong>${item.name}</strong>
+                            <span>${localise("ProjectManagement.CurrentProject")}:</span> <strong>${item.name}</strong>
                         </section>
                     </body>
                     <div class="form-group">
-                        <label for="currentProgress">Current Progress:</label>
+                        <label for="currentProgress">${localise("ProjectManagement.CurrentProgress")}</label>
                         <input type="text" id="currentProgress" name="currentProgress" placeholder="0 gp" value="${normaliseCoins(projectDetails.progressInCopper).toString()}">
                     </div>
                     <div class="form-group">
-                        <label for="DC">DC:</label>
+                        <label for="DC">${localise("EditProjectWindow.DC")}</label>
                         <input type="number" name="DC" id="DC" value=${projectDetails.DC} min=0 step=1>
                     </div>
                     <div class="form-group">
-                        <label for="batchSize">Batch size:</label>
+                        <label for="batchSize">${localise("EditProjectWindow.BatchSize")}</label>
                         <input type="number" name="batchSize" id="batchSize" value=${projectDetails.batchSize} min=1 step=1>
                     </div>
                 </form>
-            `,
+        `,
         buttons: {
             ok: {
-                label: "Confirm Changes",
+                label: localise("EditProjectWindow.ConfirmChangesButton"),
                 icon: "<i class='fas fa-edit fa-1x fa-fw'></i>",
                 callback: (html) => {
 
@@ -413,7 +427,7 @@ export async function projectEditDialog(projectDetails) {
                 }
             },
             cancel: {
-                label: "Cancel",
+                label: localise("EditProjectWindow.CancelButton"),
                 icon: "<i class='fa-solid fa-ban'></i>",
             }
         },
@@ -429,7 +443,7 @@ export async function projectEditDialog(projectDetails) {
  */
 export async function projectToChat(actor, projectUUID) {
     if (!projectUUID || projectUUID === "") {
-        console.error("[HEROIC CRAFTING] Missing Project UUID when posting to chat!");
+        console.error("[HEROIC CRAFTING AUTOMATION] Missing Project UUID when posting to chat!");
         return;
     }
 
@@ -437,7 +451,7 @@ export async function projectToChat(actor, projectUUID) {
     const project = actorProjects.filter(project => project.ID === projectUUID)[0];
 
     if (!project) {
-        ui.notifications.error(`${actor.name} does not have project ${projectUUID} to post to chat!`);
+        ui.notifications.error(localise("CharSheet.CannotPostToChat", { name: actor.name, projectUUID }));
         return;
     }
 
@@ -456,7 +470,7 @@ export async function projectToChat(actor, projectUUID) {
         batchSize: project.batchSize,
         currentValue: currentValue.toString(),
         price: price.toString(),
-        completion: `${Math.floor(currentValue.copperValue / price.copperValue * 100)}%`
+        completion: `${Math.floor(currentValue.copperValue / price.copperValue * 100)}% `
     }
 
     ChatMessage.create({

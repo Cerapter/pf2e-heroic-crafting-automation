@@ -1,4 +1,4 @@
-import { getPreferredPayMethod, MODULE_NAME, setPreferredPayMethod, spendingLimit } from "./constants.js";
+import { getPreferredPayMethod, localise, MODULE_NAME, setPreferredPayMethod, spendingLimit } from "./constants.js";
 import { projectBeginDialog, projectCraftDialog, projectEditDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
@@ -21,7 +21,7 @@ import { payWithCoinsAndTrove, getTroves } from "./trove.js";
  */
 export async function beginAProject(crafterActor, itemDetails, skipDialog = true) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
-        console.error("[HEROIC CRAFTING] Missing UUID when beginning a project!");
+        console.error("[HEROIC CRAFTING AUTOMATION] Missing UUID when beginning a project!");
         return;
     }
 
@@ -46,7 +46,7 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
     await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
     if (!payment.canPay) {
-        ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
+        ui.notifications.warn(localise("ProjectBeginWindow.CannotPay", { name: crafterActor.name }));
         return;
     }
 
@@ -72,7 +72,11 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
 
     ChatMessage.create({
         user: game.user.id,
-        content: `<strong>${crafterActor.name}</strong> starts a project of <strong>${(await fromUuid(itemDetails.UUID)).name}</strong> with the Current Value of ${normaliseCoins(dialogResult.startingProgress)}.`,
+        content: localise("ProjectBeginWindow.PCStartsAProject", {
+            name: crafterActor.name,
+            itemName: (await fromUuid(itemDetails.UUID)).name,
+            currentValue: normaliseCoins(dialogResult.startingProgress)
+        }),
         speaker: { alias: crafterActor.name },
     });
 
@@ -98,11 +102,11 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
  */
 export async function craftAProject(crafterActor, itemDetails, skipDialog = true, projectOwner = crafterActor) {
     if (!itemDetails.UUID || itemDetails.UUID === "") {
-        console.error("[HEROIC CRAFTING] Missing Item UUID when crafting a project!");
+        console.error("[HEROIC CRAFTING AUTOMATION] Missing Item UUID when crafting a project!");
         return;
     }
     if (!itemDetails.projectUUID || itemDetails.projectUUID === "") {
-        console.error("[HEROIC CRAFTING] Missing Project UUID when crafting a project!");
+        console.error("[HEROIC CRAFTING AUTOMATION] Missing Project UUID when crafting a project!");
         return;
     }
 
@@ -110,7 +114,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     const project = actorProjects.filter(project => project.ID === itemDetails.projectUUID)[0];
 
     if (!project) {
-        ui.notifications.error(`${projectOwner.name} does not have project ${itemDetails.projectUUID} to craft!`);
+        ui.notifications.error(localise("CraftWindow.DoesNotHaveProjectToCraft", { name: projectOwner.name, projectUUID: itemDetails.projectUUID }));
         return;
     }
 
@@ -126,7 +130,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     }
 
     if (dialogResult.spendingAmount.copperValue === 0) {
-        ui.notifications.info(`Please input a meaningful cost (> 0 cp) for Craft a Project!`);
+        ui.notifications.info(localise("CraftWindow.InputMeaningfulCost"));
         return;
     }
 
@@ -142,7 +146,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
     if (!payment.canPay) {
-        ui.notifications.warn(`${crafterActor.name} cannot afford to start the project!`);
+        ui.notifications.warn(localise("CraftWindow.CannotPay", { name: crafterActor.name }));
         return;
     }
 
@@ -160,7 +164,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     if (project.progressInCopper + dialogResult.spendingAmount.copperValue >= cost.copperValue) {
         ChatMessage.create({
             user: game.user.id,
-            content: `<strong>${crafterActor.name}</strong> skips the Craft check for <strong>${projectItem.name}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.`,
+            content: localise("CraftWindow.Progress.SkipCheck", { name: crafterActor.name, itemName: projectItem.name }),
             speaker: { alias: crafterActor.name },
         });
         progressProject(projectOwner, project.ID, true, dialogResult.spendingAmount);
@@ -200,7 +204,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * @param {ActorPF2e} details.projectOwner The actor who owns the project. Usually the same as the crafterActor, but not always! 
  */
 async function rollCraftAProject(crafterActor, project, details) {
-    const actionName = "Craft a Project";
+    const actionName = localise("CraftWindow.Title");
     let skillName = "crafting";
 
     if (details.customValues.some((i) => i.name === "naturalBornTinker" && i.value === true)) {
@@ -227,15 +231,15 @@ async function rollCraftAProject(crafterActor, project, details) {
     {
         extraRollNotes.push({
             "outcome": ["success", "criticalSuccess"],
-            "text": "<p><strong>Sucess</strong> You work productively during this period. Add double this activity's Cost to the project's Current Value.</p>"
+            "text": localise("CraftWindow.Roll.Success")
         });
         extraRollNotes.push({
             "outcome": ["failure"],
-            "text": "<p><strong>Failure</strong> You work unproductively during this period. Add half this activity's Cost to the project's Current Value.</p>"
+            "text": localise("CraftWindow.Roll.Failure")
         });
         extraRollNotes.push({
             "outcome": ["criticalFailure"],
-            "text": "<p><strong>Critical Failure</strong> You ruin your materials and suffer a setback while crafting. Deduct this activity's Cost from the project's Current Value. If this reduces the project's Current Value below 0, the project is ruined and must be started again.</p>"
+            "text": localise("CraftWindow.Roll.CriticalFailure")
         });
     }
     {
@@ -260,7 +264,7 @@ async function rollCraftAProject(crafterActor, project, details) {
 
     if (details.overtime != 0) {
         modifiers.push(new game.pf2e.Modifier({
-            label: "Overtime",
+            label: localise("CraftWindow.Roll.Overtime"),
             modifier: details.overtime,
             type: "untyped",
         }));
@@ -319,7 +323,7 @@ async function rollCraftAProject(crafterActor, project, details) {
                 // TODO: Too hardcoded
                 if (details.customValues.some((i) => i.name === "efficientCrafting" && i.value === true) &&
                     outcome === "failure") {
-                    message.flavor = message.flavor.concat(`<section class="roll-note"><strong>Recover ${details.craftingMaterials.scale(0.5).toString()} of materials.</strong></section>`);
+                    message.flavor = message.flavor.concat(localise("HardcodedSupport.EfficientCrafting.RollNote", { amount: details.craftingMaterials.scale(0.5).toString() }));
                 };
 
                 craftDetails.progressString = craftDetails.progressCost.toString();
@@ -352,7 +356,7 @@ export async function abandonProject(crafterActor, projectUUID) {
  */
 export async function editProject(crafterActor, projectUUID) {
     if (!projectUUID || projectUUID === "") {
-        console.error("[HEROIC CRAFTING] Missing Project UUID when editing a project!");
+        console.error("[HEROIC CRAFTING AUTOMATION] Missing Project UUID when editing a project!");
         return;
     }
 
@@ -360,7 +364,7 @@ export async function editProject(crafterActor, projectUUID) {
     const project = actorProjects.filter(project => project.ID === projectUUID)[0];
 
     if (!project) {
-        ui.notifications.error(`${crafterActor.name} does not have project ${projectUUID} to edit!`);
+        ui.notifications.error(localise("CharSheet.CannotEditProject", { name: crafterActor.name, projectUUID }));
         return;
     }
 
@@ -453,7 +457,7 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
     const project = actorProjects.filter(project => project.ID === projectUUID)[0];
 
     if (!project) {
-        ui.notifications.error(`${crafterActor.name} does not have project ${projectUUID} to progress!`);
+        ui.notifications.error(localise("CraftWindow.DoesNotHaveProjectToProgress", { name: projectOwner.name, projectUUID: itemDetails.projectUUID }));
         return;
     }
 
@@ -469,7 +473,6 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
             itemObject.system.quantity = project.batchSize;
 
             const result = crafterActor.isOwner ? await crafterActor.addToInventory(itemObject, undefined) : "permissionLacking";
-            console.log(result);
 
             if (!result) {
                 ui.notifications.warn(game.i18n.localize("PF2E.Actions.Craft.Warning.CantAddItem"));
@@ -479,13 +482,13 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
             if (result === "permissionLacking") {
                 ChatMessage.create({
                     user: game.user.id,
-                    content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to ${crafterActor.name}, as ${game.user.name} does not have permissions to edit said actor.`,
+                    content: localise("CraftWindow.Progress.Finish", { name: crafterActor.name, batchSize: project.batchSize, itemName: projectItem.name }).concat(localise("CraftWindow.Progress.LacksPermissionToFinish", { name: crafterActor.name, playerName: game.user.name })),
                     speaker: { alias: crafterActor.name },
                 });
             } else {
                 ChatMessage.create({
                     user: game.user.id,
-                    content: `<strong>${crafterActor.name}</strong> finishes their <strong>${project.batchSize} x ${projectItem.name}</strong> project, gaining the aforementioned item(s).`,
+                    content: localise("CraftWindow.Progress.Finish", { name: crafterActor.name, batchSize: project.batchSize, itemName: projectItem.name }),
                     speaker: { alias: crafterActor.name },
                 });
                 await abandonProject(crafterActor, projectUUID);
@@ -493,7 +496,14 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         } else {
             ChatMessage.create({
                 user: game.user.id,
-                content: `<strong>${crafterActor.name}</strong> progresses on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, by ${coinAmount.toString()} (current: ${normaliseCoins(project.progressInCopper)} out of ${cost.toString()}).`,
+                content: localise("CraftWindow.Progress.Progress", {
+                    name: crafterActor.name,
+                    batchSize: project.batchSize,
+                    itemName: projectItem.name,
+                    progressAmount: coinAmount.toString(),
+                    currentProgress: normaliseCoins(project.progressInCopper),
+                    goal: cost.toString()
+                }),
                 speaker: { alias: crafterActor.name },
             });
             await crafterActor.update({
@@ -512,14 +522,21 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         if (project.progressInCopper <= 0) {
             ChatMessage.create({
                 user: game.user.id,
-                content: `<strong>${crafterActor.name}</strong> experiences setback on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, completely ruining it.`,
+                content: localise("CraftWindow.Progress.FatalSetback", { name: crafterActor.name, batchSize: project.batchSize, itemName: projectItem.name }),
                 speaker: { alias: crafterActor.name },
             });
             await abandonProject(crafterActor, projectUUID);
         } else {
             ChatMessage.create({
                 user: game.user.id,
-                content: `<strong>${crafterActor.name}</strong> experiences setback on their <strong>${project.batchSize} x ${projectItem.name}</strong> project, losing ${coinAmount.toString()} of progress (current: ${normaliseCoins(project.progressInCopper)} out of ${cost.toString()}).`,
+                content: localise("CraftWindow.Progress.Progress", {
+                    name: crafterActor.name,
+                    batchSize: project.batchSize,
+                    itemName: projectItem.name,
+                    progressAmount: coinAmount.toString(),
+                    currentProgress: normaliseCoins(project.progressInCopper),
+                    goal: cost.toString()
+                }),
                 speaker: { alias: crafterActor.name },
             });
             await crafterActor.update({

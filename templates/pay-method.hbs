@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label for="payMethod">Pay Method:</label>
+    <label for="payMethod">{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.ProjectManagement.PayMethod"}}</label>
     <select id="payMethod" name="payMethod">
         {{#each paymentOptions}}
             <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.text}}</option>

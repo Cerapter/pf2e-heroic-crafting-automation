@@ -1,4 +1,4 @@
-import { HeroicCraftingHourlySpendingLimit, HeroicCraftingGatheredIncome, spendingLimit, MODULE_NAME } from "./constants.js";
+import { HeroicCraftingHourlySpendingLimit, HeroicCraftingGatheredIncome, spendingLimit, MODULE_NAME, localise } from "./constants.js";
 import { beginAProject, craftAProject, abandonProject, getProjectsToDisplay, progressProject, editProject } from "./crafting.js";
 import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
@@ -9,8 +9,8 @@ Hooks.on(
     "init",
     () => {
         game.settings.register(MODULE_NAME, "hoursInADay", {
-            name: "Hours in a Day",
-            hint: "The amount of hours you can spend crafting in a day before incurring penalties due to Working Overtime.",
+            name: localise("Config.HoursInADay.Name"),
+            hint: localise("Config.HoursInADay.Hint"),
             scope: "world",
             config: true,
             default: 4,
@@ -18,8 +18,8 @@ Hooks.on(
         });
 
         game.settings.register(MODULE_NAME, "daysInAWeek", {
-            name: "Days in a Week",
-            hint: "The amount of days a week is used as a shorthand for for spending limit purposes, and implicitly also the amount of days in a week you can craft without Working Overtime.",
+            name: localise("Config.DaysInAWeek.Name"),
+            hint: localise("Config.DaysInAWeek.Hint"),
             scope: "world",
             config: true,
             default: 5,
@@ -50,7 +50,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         const formulaItems = formulas.find(".formula-item");
         const itemControls = formulaItems.find(".item-controls");
 
-        itemControls.prepend(`<a class="item-control" title="Begin Project" data-action="heroic-crafting-begin-project"><i class="fa-solid fa-fw fa-scroll"></i></a>`);
+        itemControls.prepend(`<a class="item-control" title="${localise("CharSheet.BeginProject")}" data-action="heroic-crafting-begin-project"><i class="fa-solid fa-fw fa-scroll"></i></a>`);
 
         itemControls.find("a[data-action=heroic-crafting-begin-project]").on("click", async (event) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";

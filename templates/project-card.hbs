@@ -1,7 +1,7 @@
 <div class="pf2e chat-card weapon-card" data-actor-id="{{actorID}}" data-project-id="{{UUID}}">
     <header class="card-header flexrow">
-        <img src="{{itemImg}}" title="Project ({{itemName}})" />
-        <h3>Project ({{itemName}})</h3>
+        <img src="{{itemImg}}" title="{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.ProjectTitle" project=itemName}}" />
+        <h3>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.ProjectTitle" project=itemName}}</h3>
     </header>
 
     <div class="card-content">
@@ -9,18 +9,18 @@
     </div>
 
     <div class="card-content">
-        This is a project to craft the item above.
+        {{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Desc"}}
     </div>
     
     <div class="card-buttons">
-        <button type="button" data-action="craft-others-project" data-item-id="{{itemID}}" data-batch-size="{{batchSize}}" class="heroic-crafting-craft-chat-button">Craft</button>
+        <button type="button" data-action="craft-others-project" data-item-id="{{itemID}}" data-batch-size="{{batchSize}}" class="heroic-crafting-craft-chat-button">{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Craft"}}</button>
     </div>
 
     <footer class="card-footer">
-        <span>DC: {{DC}}</span>
-        <span>Batch Size: {{batchSize}}</span>
-        <span>Current Value: {{currentValue}}</span>
-        <span>Price: {{price}}</span>
-        <span>Completion: {{completion}}</span>
+        <span>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Footer.DC" DC=DC}}</span>
+        <span>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Footer.BatchSize" batchSize=batchSize}}</span>
+        <span>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Footer.CurrentValue" currentValue=currentValue}}</span>
+        <span>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Footer.Price" price=price}}</span>
+        <span>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CraftCard.Footer.Completion" completion=completion}}</span>
     </footer>
 </div>

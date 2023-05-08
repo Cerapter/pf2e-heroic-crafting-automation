@@ -1,0 +1,134 @@
+{
+    "PF2E-HEROIC-CRAFTING-AUTOMATION": {
+        "Config": {
+            "HoursInADay": {
+                "Name": "Hours in a Day",
+                "Hint": "The amount of hours you can spend crafting in a day before incurring penalties due to Working Overtime."
+            },
+            "DaysInAWeek": {
+                "Name": "Days in a Week",
+                "Hint": "The amount of days a week is used as a shorthand for for spending limit purposes, and implicitly also the amount of days in a week you can craft without Working Overtime."
+            }
+        },
+        "CharSheet": {
+            "BeginProject": "Begin Project",
+            "ProjectHeader": "Projects",
+            "NameCol": "Name",
+            "DCCol": "DC",
+            "QuantityCol": "Quantity",
+            "ControlsCol": "Controls",
+            "Completion": "Completion: <strong>{currentlyDone}</strong> / {cost}",
+            "Empty": "Empty",
+            "CannotEditProject": "{name} does not have project {projectUUID} to edit!",
+            "CannotPostToChat": "{name} does not have project {projectUUID} to post to chat!"
+        },
+        "CraftWindow": {
+            "DoesNotHaveProjectToCraft": "{name} does not have project {projectUUID} to craft!",
+            "DoesNotHaveProjectToProgress": "{name} does not have project {projectUUID} to progress!",
+            "InputMeaningfulCost": "Please input a meaningful cost (> 0 cp) for Craft a Project!",
+            "CannotPay": "{name} cannot afford to start the project!",
+            "Title": "Craft A Project",
+            "CraftingDuration": {
+                "Title": "Crafting Duration:",
+                "Hour": "Hour",
+                "Day": "Day",
+                "Week": "Week"
+            },
+            "OvertimePenalty": {
+                "Title": "Overtime Penalty:",
+                "NoOvertime": "No overtime"
+            },
+            "CraftProjectButton": "Craft Project",
+            "CancelButton": "Cancel",
+            "Progress": {
+                "SkipCheck": "<strong>{name}</strong> skips the Craft check for <strong>{itemName}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.",
+                "Progress": "<strong>{name}</strong> progresses on their <strong>${batchSize} x ${itemName}</strong> project, by {progressAmount} (current: {currentProgress} out of {goal}).",
+                "Setback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, losing {progressAmount} of progress (current: {currentProgress} out of {goal}).",
+                "FatalSetback": "<strong${name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, completely ruining it.",
+                "Finish": "<strong>{name}</strong> finishes their <strong>{batchSize} x {itemName}</strong> project, gaining the aforementioned item(s).",
+                "LacksPermissionToFinish": "<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to {name}, as {playerName} does not have permissions to edit said actor."
+            },
+            "Roll": {
+                "Success": "<p><strong>Sucess</strong> You work productively during this period. Add double this activity's Cost to the project's Current Value.</p>",
+                "Failure": "<p><strong>Failure</strong> You work unproductively during this period. Add half this activity's Cost to the project's Current Value.</p>",
+                "CriticalFailure": "<p><strong>Critical Failure</strong> You ruin your materials and suffer a setback while crafting. Deduct this activity's Cost from the project's Current Value. If this reduces the project's Current Value below 0, the project is ruined and must be started again.</p>",
+                "Overtime": "Overtime"
+            }
+        },
+        "ProjectBeginWindow": {
+            "CannotPay": "{name} cannot afford to start the project!",
+            "PCStartsAProject": "<strong>{name}</strong> starts a project of <strong>{itemName}</strong> with the Current Value of {currentValue}.",
+            "Title": "Begin A Project",
+            "BeginProjectButton": "Begin Project",
+            "CancelButton": "Cancel"
+        },
+        "EditProjectWindow": {
+            "Title": "Edit Project Details",
+            "DC": "DC:",
+            "BatchSize": "Batch Size:",
+            "ConfirmChangesButton": "Confirm Changes",
+            "CancelButton": "Cancel"
+        },
+        "ProjectManagement": {
+            "CurrentProject": "Current Project:",
+            "RemainingMaterials": "Remaining Materials",
+            "MaximumCost": "Maximum Cost",
+            "OverspendingWarning": "OVERSPENDING!",
+            "SpentMaterialsSoFar": "Spent Materials:",
+            "CurrentProgress": "Current Progress:",
+            "PayMethod": "Pay Method",
+            "FullCoin": "Coins only",
+            "PreferCoin": "Coins, then Troves",
+            "PreferTrove": "Troves, the coins",
+            "FullTrove": "Material Troves only",
+            "Free": "Free"
+        },
+        "CraftCard": {
+            "ProjectTitle": "Project ({project})",
+            "Desc": "This is a project to craft the item above.",
+            "Craft": "Craft",
+            "Footer": {
+                "DC": "DC: {DC}",
+                "BatchSize": "Batch Size: {batchSize}",
+                "CurrentValue": "Current Value: {currentValue}",
+                "Price": "Price: {price}",
+                "Completion": "Completion: {completion}"
+            }
+        },
+        "CraftingResult": {
+            "Progress": "Progress project's Current Value by {progress}",
+            "Deduct": "Deduct {progress} from project's Current Value"
+        },
+        "HardcodedSupport": {
+            "Hyperfocus": {
+                "Name": "Hyperfocus",
+                "Desc": "Applies while you have the feat. Make more progress on critical successes on a check to Craft a Project for at least a day."
+            },
+            "MidnightCrafting": {
+                "Name": "Midnight Crafting",
+                "Desc": "Craft in 10 minutes.",
+                "NoSurcharge": "No rush surcharge.",
+                "Surcharge": "Pay extra {cost} in rush costs."
+            },
+            "NaturalBornTinker": {
+                "Name": "Natural-Born Tinker",
+                "Desc": "Craft with Survival instead of Crafting?"
+            },
+            "HerbalistDedication": {
+                "Name": "Herbalist Dedication",
+                "Desc": "Craft with Nature instead of Crafting?",
+                "CurrentItemIsHerbal": "Note: Current item <b>IS</b> herbal.",
+                "CurrentItemIsNotHerbal": "Note: Current item <b>IS NOT</b> herbal."
+            },
+            "EfficientCrafting": {
+                "Name": "Efficient Crafting",
+                "Desc": "Recover materials on a failure? (Check manually if applies!)",
+                "RollNote": "<section class=\"roll-note\"><strong>Recover {amount} of materials.</strong></section>"
+            },
+            "QuickCrafting": {
+                "Name": "Quick Crafting",
+                "Desc": "Double the spending limit?"
+            }
+        }
+    }
+}

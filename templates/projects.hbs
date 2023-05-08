@@ -1,22 +1,22 @@
 <li class="known-formulas item-container" data-container-type="heroicCraftingProjects" id="heroic-crafting-projects">
     <div class="action-header">
         <h3 class="item-name hide-container-toggle title">
-            Projects
+            {{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.ProjectHeader"}}
         </h3>
     </div>
     <ol class="directory-list item-list formula-list">
         <li class="formula-level-header formula-header heroic-project-header">
             <div class="level-name flexrow">
-                <h3>Name</h3>
+                <h3>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.NameCol"}}</h3>
             </div>
             <div class="formula-dc-header">
-                DC
+                {{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.DCCol"}}
             </div>
             <div class="formula-quantity-header">
-                Quantity
+                {{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.QuantityCol"}}
             </div>
             <div class="formula-quantity-header">
-                Controls
+                {{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.ControlsCol"}}
             </div>
         </li>
         {{#each projects as |project|}}
@@ -43,12 +43,12 @@
             </li>
             <div class="heroic-crafting-project">
                 <span class="heroic-crafting-project-bar" style="width:{{project.progress}}%"></span>
-                <span class="heroic-crafting-project-bar-label">Completion: <strong>{{project.currentlyDone}}</strong> / {{project.cost}}</span>
+                <span class="heroic-crafting-project-bar-label">{{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.Completion" currentlyDone=project.currentlyDone cost=project.cost}}}</span>
             </div>
         {{else}}
             {{#if @root.editable}}
                 <li class="formula-header empty">
-                    <h4>Empty</h4>
+                    <h4>{{localize "PF2E-HEROIC-CRAFTING-AUTOMATION.CharSheet.Empty"}}</h4>
                 </li>
             {{/if}}
         {{/each}}

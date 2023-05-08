@@ -86,3 +86,6 @@ export function getPreferredPayMethod(actor) {
 export async function setPreferredPayMethod(actor, preferredPayMethod = "fullCoin") {
     await actor.update({ [`flags.${MODULE_NAME}.preferredPayMethod`]: preferredPayMethod });
 }
+
+/// Quick and easy way to localise stuff.
+export const localise = (key, data = null) => game.i18n.format("PF2E-HEROIC-CRAFTING-AUTOMATION." + key, data)
