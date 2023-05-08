@@ -165,7 +165,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         });
         progressProject(projectOwner, project.ID, true, dialogResult.spendingAmount);
     } else {
-        rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, customValues: dialogResult.customValues, projectOwner });
+        await rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, customValues: dialogResult.customValues, projectOwner });
     }
 };
 
@@ -183,7 +183,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * @param {ActorPF2e} crafterActor The actor who is crafting the project. 
  * @param {Object} project The project being worked on.
  * @param {string} project.ID The UUID of the project itself.
- * @param {string} project.ItemUUID The UUID of the item specifically. Unused.
+ * @param {string} project.ItemUUID The UUID of the item specifically.
  * @param {number} project.progressInCopper The current progress on the project, measured in copper.
  * @param {number} project.batchSize The amount of items being made at once.
  * Usually relevant for consumables more, and is 1 for permanent items. 
@@ -199,7 +199,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * check somehow.
  * @param {ActorPF2e} details.projectOwner The actor who owns the project. Usually the same as the crafterActor, but not always! 
  */
-function rollCraftAProject(crafterActor, project, details) {
+async function rollCraftAProject(crafterActor, project, details) {
     const actionName = "Craft a Project";
     let skillName = "crafting";
 
@@ -211,11 +211,13 @@ function rollCraftAProject(crafterActor, project, details) {
         skillName = "nature";
     }
 
+    const projectItem = await fromUuid(project.ItemUUID);
+    const itemRollOptions = projectItem.getRollOptions("crafting:item");
     const craftSkillCheck = crafterActor.skills[skillName].extend({
         check: {
             label: `${actionName}`
         },
-        rollOptions: [`action:craft`, `action:craftproj`],
+        rollOptions: [`action:craft`, `action:craftproj`, ...itemRollOptions],
         slug: "action-craft-a-project"
     });
 
