@@ -7,6 +7,15 @@ import { normaliseCoins } from "./coins.js";
  */
 export const MODULE_NAME = "pf2e-heroic-crafting-automation";
 
+/// The prefix used for all Heroic Crafting related rolloptions.
+export const ROLLOPTION_PREFIX = "crafting:heroic";
+
+/// The prefix used for Heroic Crafting related rolloptions about the items.
+export const ROLLOPTION_ITEM_PREFIX = `${ROLLOPTION_PREFIX}:item`;
+
+/// The prefix used for Heroic Crafting related rolloptions about the various toggles in the craft window.
+export const ROLLOPTION_SETTINGS_PREFIX = `${ROLLOPTION_PREFIX}:settings`;
+
 /** 
  * The Spending Limit table's Hour column. Note that THAT table starts at level 1, but arrays obviously start at 0. 
  * 

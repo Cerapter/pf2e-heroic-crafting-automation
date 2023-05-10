@@ -1,4 +1,4 @@
-import { getPreferredPayMethod, localise, MODULE_NAME, setPreferredPayMethod, spendingLimit } from "./constants.js";
+import { getPreferredPayMethod, localise, MODULE_NAME, ROLLOPTION_ITEM_PREFIX, ROLLOPTION_PREFIX, ROLLOPTION_SETTINGS_PREFIX, setPreferredPayMethod } from "./constants.js";
 import { projectBeginDialog, projectCraftDialog, projectEditDialog } from "./dialog.js";
 import { normaliseCoins } from "./coins.js";
 import { payWithCoinsAndTrove, getTroves } from "./trove.js";
@@ -121,8 +121,6 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
     let dialogResult = {};
     if (!skipDialog) {
         dialogResult = await projectCraftDialog(crafterActor, itemDetails);
-    } else {
-        dialogResult = {};
     }
 
     if (typeof dialogResult.duration === "undefined") {
@@ -134,14 +132,19 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         return;
     }
 
-    // TODO: Kinda hardcoded?
-    const rushCostDoubling = dialogResult.customValues.some((i) => i.name === "midnightCrafting" && i.value === true) ? 2 : 1;
+    let rushCosts = game.pf2e.Coins.fromString("0 gp");
+
+    for (const toggle in dialogResult.toggles) {
+        if (dialogResult.toggles.hasOwnProperty(toggle)) {
+            rushCosts = rushCosts.add(game.pf2e.Coins.fromString(dialogResult.toggles[toggle].rushCost));
+        }
+    }
 
     const payment = payWithCoinsAndTrove(
         dialogResult.payMethod,
         crafterActor.inventory.coins,
         getTroves(crafterActor),
-        dialogResult.spendingAmount.scale(rushCostDoubling));
+        dialogResult.spendingAmount.add(rushCosts));
 
     await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
@@ -169,7 +172,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         });
         progressProject(projectOwner, project.ID, true, dialogResult.spendingAmount);
     } else {
-        await rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, customValues: dialogResult.customValues, projectOwner });
+        await rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, rushCosts, modifiers: dialogResult.modifiers, projectOwner });
     }
 };
 
@@ -199,29 +202,35 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * @param {0 | -5 | -10} details.overtime If not zero, applies an untyped "Overtime" penalty to the check.
  * @param {game.coins.pf2e} details.craftingMaterials The amount of value the actor spent trying to craft. 
  * The progress made is based on this.
- * @param {{name: string, value: boolean}[]} details.customValues An array of name-value pairs that modify the craft
- * check somehow.
+ * @param {game.coins.pf2e} details.rushCosts The amount of extra, "useless" value the actor spent trying to craft.
+ * @param {{active: boolean, amount: number | string, mode: string, target: string, toggledBy: string}[]} 
+ * details.modifiers An array of essentially ModifyCraftAProject rule elements that change the craft check somehow.
  * @param {ActorPF2e} details.projectOwner The actor who owns the project. Usually the same as the crafterActor, but not always! 
  */
 async function rollCraftAProject(crafterActor, project, details) {
     const actionName = localise("CraftWindow.Title");
     let skillName = "crafting";
+    const settingsRollOptions = [];
 
-    if (details.customValues.some((i) => i.name === "naturalBornTinker" && i.value === true)) {
-        skillName = "survival";
-    }
+    for (const rollMod of details.modifiers) {
+        if (rollMod.active) {
+            if (rollMod.mode === "override" && rollMod.target === "skill") {
+                skillName = rollMod.amount;
+            }
 
-    if (details.customValues.some((i) => i.name === "herbalistDed" && i.value === true)) {
-        skillName = "nature";
+            if (rollMod.toggledBy) {
+                settingsRollOptions.push(`${ROLLOPTION_SETTINGS_PREFIX}:${rollMod.toggledBy}`);
+            }
+        }
     }
 
     const projectItem = await fromUuid(project.ItemUUID);
-    const itemRollOptions = projectItem.getRollOptions("crafting:item");
+    const itemRollOptions = projectItem.getRollOptions(ROLLOPTION_ITEM_PREFIX);
     const craftSkillCheck = crafterActor.skills[skillName].extend({
         check: {
             label: `${actionName}`
         },
-        rollOptions: [`action:craft`, `action:craftproj`, ...itemRollOptions],
+        rollOptions: [`action:craft`, `action:craftproj`, `${ROLLOPTION_PREFIX}:duration:${details.duration}`, ...settingsRollOptions, ...itemRollOptions],
         slug: "action-craft-a-project"
     });
 
@@ -282,51 +291,44 @@ async function rollCraftAProject(crafterActor, project, details) {
             if (message instanceof ChatMessage) {
                 let craftDetails = {
                     progress: false,
-                    progressCost: new game.pf2e.Coins(),
-                    progressString: "0 gp",
+                    progressMade: new game.pf2e.Coins(),
+                    progressCost: details.craftingMaterials,
+                    rushCost: details.rushCosts,
+                    overallCost: details.craftingMaterials.add(details.rushCosts),
                     projectUuid: project.ID,
                     actor: details.projectOwner.id
                 };
 
                 if (outcome === "success" || outcome === "criticalSuccess") {
                     craftDetails.progress = true;
-                    craftDetails.progressCost = details.craftingMaterials.scale(2);
+                    craftDetails.progressMade = details.craftingMaterials.scale(2);
                 } else if (outcome === "failure") {
                     craftDetails.progress = true;
-                    craftDetails.progressCost = details.craftingMaterials.scale(0.5);
+                    craftDetails.progressMade = details.craftingMaterials.scale(0.5);
                 } else {
                     craftDetails.progress = false;
-                    craftDetails.progressCost = details.craftingMaterials;
+                    craftDetails.progressMade = details.craftingMaterials;
                 };
 
-                // Hyperfocus
-                // TODO: Too hardcoded
-                if (details.customValues.some((i) => i.name === "hyperfocus" && i.value === true) &&
-                    outcome === "criticalSuccess") {
-                    if (details.duration === "day") {
-                        craftDetails.progressCost =
-                            craftDetails.progressCost.add(spendingLimit("hour", crafterActor.level));
-                    } else if (details.duration === "week") {
-                        craftDetails.progressCost =
-                            craftDetails.progressCost.add(spendingLimit("day", crafterActor.level));
-                    }
-                };
+                if ("AddCraftProgress" in crafterActor.synthetics) {
+                    crafterActor.synthetics["AddCraftProgress"].forEach(synthetic => {
+                        if (typeof synthetic.outcome === "undefined" ||
+                            synthetic.outcome.length === 0 ||
+                            synthetic.outcome.includes(outcome)) {
+                            if (synthetic.coins) {
+                                craftDetails.progressMade = craftDetails.progressMade.add(synthetic.coins);
+                            } else {
+                                switch (synthetic.mode) {
+                                    case "multiply":
+                                        craftDetails.progressMade = craftDetails.progressMade.scale(synthetic.amount);
+                                        break;
+                                }
+                            }
+                        }
+                    });
 
-                // Midnight Crafting
-                // TODO: Too hardcoded
-                if (details.customValues.some((i) => i.name === "midnightCrafting" && i.value === true) &&
-                    outcome === "criticalFailure") {
-                    craftDetails.progressCost = craftDetails.progressCost.scale(2);
-                };
-
-                // Efficient Crafting
-                // TODO: Too hardcoded
-                if (details.customValues.some((i) => i.name === "efficientCrafting" && i.value === true) &&
-                    outcome === "failure") {
-                    message.flavor = message.flavor.concat(localise("HardcodedSupport.EfficientCrafting.RollNote", { amount: details.craftingMaterials.scale(0.5).toString() }));
-                };
-
-                craftDetails.progressString = craftDetails.progressCost.toString();
+                    crafterActor.synthetics["AddCraftProgress"] = [];
+                }
 
                 const flavour = await renderTemplate(`modules/${MODULE_NAME}/templates/crafting-result.hbs`, craftDetails);
                 message.updateSource({ flavor: message.flavor + flavour });

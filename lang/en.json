@@ -92,43 +92,20 @@
                 "BatchSize": "Batch Size: {batchSize}",
                 "CurrentValue": "Current Value: {currentValue}",
                 "Price": "Price: {price}",
-                "Completion": "Completion: {completion}"
+                "Completion": "Completion: {completion}",
+                "PostCraft": "Cost: {overallCost} ({progressCost} spent, plus {rushCost} rush costs)"
             }
         },
         "CraftingResult": {
             "Progress": "Progress project's Current Value by {progress}",
             "Deduct": "Deduct {progress} from project's Current Value"
-        },
-        "HardcodedSupport": {
-            "Hyperfocus": {
-                "Name": "Hyperfocus",
-                "Desc": "Applies while you have the feat. Make more progress on critical successes on a check to Craft a Project for at least a day."
-            },
-            "MidnightCrafting": {
-                "Name": "Midnight Crafting",
-                "Desc": "Craft in 10 minutes.",
-                "NoSurcharge": "No rush surcharge.",
-                "Surcharge": "Pay extra {cost} in rush costs."
-            },
-            "NaturalBornTinker": {
-                "Name": "Natural-Born Tinker",
-                "Desc": "Craft with Survival instead of Crafting?"
-            },
-            "HerbalistDedication": {
-                "Name": "Herbalist Dedication",
-                "Desc": "Craft with Nature instead of Crafting?",
-                "CurrentItemIsHerbal": "Note: Current item <b>IS</b> herbal.",
-                "CurrentItemIsNotHerbal": "Note: Current item <b>IS NOT</b> herbal."
-            },
-            "EfficientCrafting": {
-                "Name": "Efficient Crafting",
-                "Desc": "Recover materials on a failure? (Check manually if applies!)",
-                "RollNote": "<section class=\"roll-note\"><strong>Recover {amount} of materials.</strong></section>"
-            },
-            "QuickCrafting": {
-                "Name": "Quick Crafting",
-                "Desc": "Double the spending limit?"
-            }
+        }
+    },
+    "PF2E": {
+        "RuleElement": {
+            "AddCraftProgress": "Heroic Crafting - Add Craft Progress",
+            "CraftingOption": "Heroic Crafting - Crafting Option",
+            "ModifyCraftAProject": "Heroic Crafting - Modify \"Craft a Project\""
         }
     }
 }

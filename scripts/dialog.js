@@ -120,135 +120,54 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
  * overtime: 0 | -5 | -10, 
  * payMethod: "fullCoin" | "preferCoin" | "preferTrove" | "fullTrove" | "free", 
  * spendingAmount: game.pf2e.Coins,
- * customValues: {name: string, value: boolean}[]} |{}} 
- * An anonymous struct of four values.  
+ * toggles: {XYZ: {value: boolean, rushCost: string}},
+ * modifiers: {active: boolean, amount: number | string, mode: string, target: string, toggledBy?: string}}} 
+ * An anonymous struct of six values.  
  * - `duration` determines for how long the crafting activity continues.  
  * - `overtime` is the Overtime penalty the crafting activity is taking.  
  * - `payMethod` is the choice of how the crafting activity should be paid for -- see payWithCoinsAndTrove()  
  * - `spendingAmount` is the Coin the activity will cost.
- * - `customValues` is an array of name-value pairs that were gathered from additional configurations given by feats.
+ * - `toggles` is a struct of key-value pairs that were gathered from additional configurations given by feats.
+ * - `modifiers` is an array of essentially ModifyCraftAProject rule elements, 
+ *   with an additional `active` field if they are, well, active.
  * 
  * Alternatively, if cancelled, the dialog will return an empty struct.
  */
 export async function projectCraftDialog(actor, itemDetails) {
     const item = await fromUuid(itemDetails.UUID);
     const extraHTML = [];
-    const extraRender = [];
-    let spendingLimitMultiplier = 1;
+    let modifiers = [];
 
-    // TODO: Lift this feat checking part out.
-    if (CheckFeat(actor, "hyperfocus")) {
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="hyperfocus">${localise("HardcodedSupport.Hyperfocus.Name")}:</label>
-            <input type="checkbox" id="hyperfocus" name="hyperfocus" checked disabled>
-        </div>
-        <p class="notes">${localise("HardcodedSupport.Hyperfocus.Desc")}</p>
-        `)
+    for (const rule of actor.rules) {
+        if (typeof (rule.preCraft) === "function") {
+            rule.preCraft(item);
+        }
     }
 
-    if (CheckFeat(actor, "midnight-crafting")) {
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="midnightCrafting">${localise("HardcodedSupport.MidnightCrafting.Name")}:</label>
-            <input type="checkbox" id="midnightCrafting" name="midnightCrafting">
-        </div>
-        <p class="notes" id="midnightCraftingNotes">${localise("HardcodedSupport.MidnightCrafting.Desc")} ${localise("HardcodedSupport.MidnightCrafting.NoSurcharge")}}</p >
+    if ("CraftingOption" in actor.synthetics) {
+        for (const synthetic of actor.synthetics["CraftingOption"]) {
+            const key = synthetic.label
+                .replace(/([a-z])([A-Z])/g, "$1-$2")
+                .replace(/[\s_]+/g, '-')
+                .toLowerCase();
+            const checked = synthetic.default ? "checked" : "";
+            const disabled = synthetic.toggleable ? "" : "disabled";
+
+            extraHTML.push(`
+            <div class="form-group extra-craft-modifiers" >
+                <label for="${key}">${synthetic.label} <strong style="color: red" hidden></strong></label>
+                <input type="checkbox" id="${key}" name="${key}" ${checked} ${disabled}>
+            </div>
+            <p class="notes">${synthetic.desc}</p>
         `);
-
-        extraRender.push(
-            (content) => {
-                content
-                    .querySelector("[id=midnightCrafting]")
-                    .addEventListener("change", (event) => {
-                        const rushCost = game.pf2e.Coins.fromString($(event.target).parent().parent().find("[id=spendingAmount]").val());
-
-                        if (event.target.checked === true) {
-                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(
-                                localise("HardcodedSupport.MidnightCrafting.Desc").concat(
-                                    " ",
-                                    localise("HardcodedSupport.MidnightCrafting.Surcharge", {
-                                        cost: rushCost.toString()
-                                    })
-                                )
-                            );
-                        } else {
-                            $(event.target).parent().siblings("[id=midnightCraftingNotes]").html(
-                                localise("HardcodedSupport.MidnightCrafting.Desc").concat(
-                                    " ",
-                                    localise("HardcodedSupport.MidnightCrafting.NoSurcharge")
-                                )
-                            );
-                        }
-                    });
-
-                content
-                    .querySelector("[id=spendingAmount]")
-                    .addEventListener("keyup", (event) => {
-                        event.target.parentElement.parentElement.querySelector("#midnightCrafting").dispatchEvent(new Event("change"));
-                    });
-            }
-        )
+        }
     }
 
-    if (CheckFeat(actor, "natural-born-tinker")) {
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers" >
-            <label for="naturalBornTinker">${localise("HardcodedSupport.NaturalBornTinker.Name")}:</label>
-            <input type="checkbox" id="naturalBornTinker" name="naturalBornTinker">
-        </div>
-        <p class="notes">${localise("HardcodedSupport.NaturalBornTinker.Desc")}</p>
-    `);
-    }
-
-    if (CheckFeat(actor, "herbalist-dedication")) {
-        const isHerbal = (
-            item.system.traits.otherTags.includes("herbal") ||
-            (item.system.traits.value.includes("alchemical") && item.system.traits.value.includes("healing"))
-        );
-
-        const extraHint = isHerbal ?
-            localise("HardcodedSupport.HerbalistDedication.CurrentItemIsHerbal") :
-            localise("HardcodedSupport.HerbalistDedication.CurrentItemIsNotHerbal");
-
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="herbalistDed">${localise("HardcodedSupport.HerbalistDedication.Name")}:</label>
-            <input type="checkbox" id="herbalistDed" name="herbalistDed">
-        </div>
-        <p class="notes">${localise("HardcodedSupport.HerbalistDedication.Desc")}<br>${extraHint}</p>
-    `);
-    }
-
-    if (CheckFeat(actor, "efficient-crafting")) {
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="efficientCrafting">${localise("HardcodedSupport.EfficientCrafting.Name")}:</label>
-            <input type="checkbox" id="efficientCrafting" name="efficientCrafting">
-        </div>
-        <p class="notes">${localise("HardcodedSupport.EfficientCrafting.Desc")}</p>
-    `);
-    }
-
-    if (CheckFeat(actor, "quick-crafting")) {
-        extraHTML.push(`
-        <div class="form-group extra-craft-modifiers">
-            <label for="quickCrafting">${localise("HardcodedSupport.QuickCrafting.Name")}:</label>
-            <input type="checkbox" id="quickCrafting" name="quickCrafting">
-        </div>
-        <p class="notes">${localise("HardcodedSupport.QuickCrafting.Desc")}</p>
-    `);
-
-        extraRender.push(
-            (content) => {
-                content
-                    .querySelector("[id=quickCrafting]")
-                    .addEventListener("change", (event) => {
-                        spendingLimitMultiplier = event.target.checked ? 2 : 1;
-                        event.target.parentElement.parentElement.querySelector("#craftDuration").dispatchEvent(new Event("change"));
-                    });
-            }
-        )
+    if ("ModifyCraftAProject" in actor.synthetics) {
+        for (const synthetic of actor.synthetics["ModifyCraftAProject"]) {
+            synthetic.active = synthetic.toggledBy ? false : true;
+            modifiers.push(synthetic);
+        }
     }
 
     // Purely a fancy thing, but add a horizontal line in front of the custom feat stuff if there is any.
@@ -300,15 +219,15 @@ export async function projectCraftDialog(actor, itemDetails) {
                 label: localise("CraftWindow.CraftProjectButton"),
                 icon: "<i class='fa-solid fa-hammer'></i>",
                 callback: (html) => {
-                    const customValues = [];
+                    const toggles = {};
 
                     $(html).find(".extra-craft-modifiers input").each(function () {
                         const input = $(this)[0];
 
-                        customValues.push({
-                            name: input.name,
-                            value: input.checked
-                        });
+                        toggles[input.name] = {
+                            value: input.checked,
+                            rushCost: input.parentElement.querySelector("label > strong").innerHTML
+                        };
                     });
 
                     return {
@@ -316,7 +235,8 @@ export async function projectCraftDialog(actor, itemDetails) {
                         overtime: Number($(html).find("#overtimePenalty")[0].value) || 0,
                         payMethod: $(html).find("#payMethod")[0].value,
                         spendingAmount: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value),
-                        customValues
+                        toggles,
+                        modifiers
                     };
                 }
             },
@@ -329,12 +249,22 @@ export async function projectCraftDialog(actor, itemDetails) {
             }
         },
         default: "ok",
+        close: (html) => {
+            actor.synthetics["CraftingOption"] = [];
+            actor.synthetics["ModifyCraftAProject"] = [];
+        },
         render: ([content]) => {
-
             content
                 .querySelector("[id=craftDuration]")
                 .addEventListener("change", (event) => {
-                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).scale(spendingLimitMultiplier).copperValue);
+                    let multipliers = 1;
+                    modifiers.forEach((modifier) => {
+                        if (modifier.target === "max" && modifier.active && modifier.mode === "multiply") {
+                            multipliers = multipliers * modifier.amount;
+                        }
+                    });
+
+                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).scale(multipliers).copperValue);
                     $(event.target).parent().parent().find("[id=maxCost]").html(maxCost.toString());
 
                     event.target.parentElement.parentElement.querySelector("#spendingAmount").dispatchEvent(new Event("keyup"));
@@ -359,11 +289,54 @@ export async function projectCraftDialog(actor, itemDetails) {
                         form.find("[id=spanNotOverspending]").removeAttr("hidden");
                         form.find("[id=spanOverspending]").attr("hidden", true);
                     }
+
+                    const craftModifierLabels = event.target.parentElement.parentElement.querySelectorAll("div.extra-craft-modifiers > label > strong");
+                    for (let index = 0; index < craftModifierLabels.length; index++) {
+                        craftModifierLabels[index].dispatchEvent(new Event("change"));
+
+                    }
                 });
 
-            extraRender.forEach((renderCommand) => renderCommand(content));
+            const extraCraftModifierDivs = content
+                .querySelectorAll("div.extra-craft-modifiers");
 
-            const maxCost = spendingLimit("Hour", actor.level).scale(itemDetails.batchSize);
+            for (let i = 0; i < extraCraftModifierDivs.length; i++) {
+                extraCraftModifierDivs[i].querySelector("input").addEventListener("change", (event) => {
+                    for (const modifier of modifiers) {
+                        if (modifier.toggledBy === event.target.id) {
+                            modifier.active = event.target.checked;
+
+                            switch (modifier.target) {
+                                case "max":
+                                    event.target.parentElement.parentElement.querySelector("#craftDuration").dispatchEvent(new Event("change"));
+                                    break;
+                                case "rushCost":
+                                    $(event.target).siblings("label").find("strong").attr("amount", modifier.amount);
+                                    if (modifier.active) {
+                                        $(event.target).siblings("label").find("strong").removeAttr("hidden");
+                                    } else {
+                                        $(event.target).siblings("label").find("strong").attr("hidden", true);
+                                    }
+                                    event.target.parentElement.querySelector("label > strong").dispatchEvent(new Event("change"));
+                                    break;
+                            }
+                        }
+                    }
+                });
+
+                extraCraftModifierDivs[i].querySelector("label > strong").addEventListener("change", (event) => {
+                    const cost = game.pf2e.Coins.fromString($(event.target).parent().parent().parent().find("[id=spendingAmount]").val()).scale($(event.target).attr("amount"));
+                    $(event.target).html(cost.toString());
+                });
+            }
+
+            let multipliers = 1;
+            modifiers.forEach((modifier) => {
+                if (modifier.target === "max" && modifier.active && modifier.mode === "multiply") {
+                    multipliers = multipliers * modifier.amount;
+                }
+            });
+            const maxCost = spendingLimit("Hour", actor.level).scale(itemDetails.batchSize).scale(multipliers);
             content
                 .querySelector("[id=maxCost]").innerHTML = maxCost;
             content
