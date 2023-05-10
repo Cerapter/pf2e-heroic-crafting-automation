@@ -40,6 +40,12 @@ The module comes with a foraging macro that calculates the results for you -- th
 ![A GIF of the crafting popup, now with multiple extra options, all named after various Heroic Crafting feats.](./docs/heroic_crafting_support.gif?raw=true)
 
 If you have the [Heroic Crafting](https://foundryvtt.com/packages/heroic-crafting) module, this module will extend support wherever possible if you have the appropriate feats. 
+
+### Custom Rule Elements
+
+![An image of the Rules tab on a feat, where there is a new "Heroic Crafting - Crafting Option" rule shown, with the rule element dropdown menu showing off the additional Heroic Crafting rule elements.](./docs/custom_rule_elements.png?raw=true)
+
+Beyond the feats shown above, you can make your own feats that take effect over the Craft A Project window using the module's [own custom Rule Elements](./docs/rule-elements.md).
 ## How to Install
 
 ### Standard Foundry module installation
