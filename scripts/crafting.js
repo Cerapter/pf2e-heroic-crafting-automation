@@ -172,7 +172,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         });
         progressProject(projectOwner, project.ID, true, dialogResult.spendingAmount);
     } else {
-        await rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, rushCosts, modifiers: dialogResult.modifiers, projectOwner });
+        await rollCraftAProject(crafterActor, project, { duration: dialogResult.duration, overtime: dialogResult.overtime, craftingMaterials: dialogResult.spendingAmount, rushCosts, modifiers: dialogResult.modifiers, toggles: dialogResult.toggles, projectOwner });
     }
 };
 
@@ -205,6 +205,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
  * @param {game.coins.pf2e} details.rushCosts The amount of extra, "useless" value the actor spent trying to craft.
  * @param {{active: boolean, amount: number | string, mode: string, target: string, toggledBy: string}[]} 
  * details.modifiers An array of essentially ModifyCraftAProject rule elements that change the craft check somehow.
+ * details.toggles A struct of key-value pairs of toggled craft options.
  * @param {ActorPF2e} details.projectOwner The actor who owns the project. Usually the same as the crafterActor, but not always! 
  */
 async function rollCraftAProject(crafterActor, project, details) {
@@ -224,15 +225,17 @@ async function rollCraftAProject(crafterActor, project, details) {
         }
     }
 
+    for (const toggle in details.toggles) {
+        if (details.toggles.hasOwnProperty(toggle)) {
+            const elem = details.toggles[toggle];
+            if (elem.value && !settingsRollOptions.includes(`${ROLLOPTION_SETTINGS_PREFIX}:${toggle}`)) {
+                settingsRollOptions.push(`${ROLLOPTION_SETTINGS_PREFIX}:${toggle}`);
+            }
+        }
+    }
+
     const projectItem = await fromUuid(project.ItemUUID);
     const itemRollOptions = projectItem.getRollOptions(ROLLOPTION_ITEM_PREFIX);
-    const craftSkillCheck = crafterActor.skills[skillName].extend({
-        check: {
-            label: `${actionName}`
-        },
-        rollOptions: [`action:craft`, `action:craftproj`, `${ROLLOPTION_PREFIX}:duration:${details.duration}`, ...settingsRollOptions, ...itemRollOptions],
-        slug: "action-craft-a-project"
-    });
 
     const modifiers = [];
     const traits = [];
@@ -279,11 +282,21 @@ async function rollCraftAProject(crafterActor, project, details) {
         }));
     }
 
+    const craftSkillCheck = crafterActor.skills[skillName].extend({
+        check: {
+            label: `${actionName}`,
+            modifiers
+        },
+        rollOptions: [`action:craft`, `action:craftproj`, `${ROLLOPTION_PREFIX}:duration:${details.duration}`, ...settingsRollOptions, ...itemRollOptions],
+        slug: "action-craft-a-project"
+    });
+
     craftSkillCheck.roll({
         dc: {
             value: project.DC,
             visible: true
         },
+        modifiers,
         extraRollNotes,
         createMessage: false,
         traits,
