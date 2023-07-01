@@ -1,5 +1,5 @@
 export const hardcodeRules = {
-    "Compendium.heroic-crafting.feats.GNYDY7NsX0O8BcLw": {
+    "Compendium.heroic-crafting.feats.Item.GNYDY7NsX0O8BcLw": {
         check: (item) => {
             return (item.rules[0].selector === "crafting")
         },
@@ -47,7 +47,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.heroic-crafting.feats.Bt7VlbJdvdjarCEI": {
+    "Compendium.heroic-crafting.feats.Item.Bt7VlbJdvdjarCEI": {
         check: (item) => {
             return (item.rules[0].selector === "crafting")
         },
@@ -93,7 +93,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.heroic-crafting.feats.G6mEj1Maoan4s5mx": {
+    "Compendium.heroic-crafting.feats.Item.G6mEj1Maoan4s5mx": {
         check: (item) => {
             return (item.rules.length === 0)
         },
@@ -112,7 +112,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.pf2e.feats-srd.5CRt5Dy9eLv5LpRF": {
+    "Compendium.pf2e.feats-srd.Item.5CRt5Dy9eLv5LpRF": {
         check: (item) => {
             return true;
         },
@@ -144,7 +144,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.heroic-crafting.feats.7GEXIP3cKDxu2Tw9": {
+    "Compendium.heroic-crafting.feats.Item.7GEXIP3cKDxu2Tw9": {
         check: (item) => {
             return (item.rules[0].selector === "crafting")
         },
@@ -169,7 +169,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.heroic-crafting.feats.0EfF9bH92Y2dk1J6": {
+    "Compendium.heroic-crafting.feats.Item.0EfF9bH92Y2dk1J6": {
         check: (item) => {
             return (item.rules.length === 0)
         },
@@ -188,7 +188,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.pf2e.feats-srd.PiUe3tpv7UVtnfvS": {
+    "Compendium.pf2e.feats-srd.Item.PiUe3tpv7UVtnfvS": {
         check: (item) => {
             return (item.rules[0].selector === "crafting" &&
                 item.system.prerequisites.value.find(
@@ -224,7 +224,7 @@ export const hardcodeRules = {
             }
         ]
     },
-    "Compendium.heroic-crafting.items.qc0jdrtVr7R3BbY9": {
+    "Compendium.heroic-crafting.items.Item.qc0jdrtVr7R3BbY9": {
         check: (item) => {
             return (item.rules[0].selector === "crafting")
         },
