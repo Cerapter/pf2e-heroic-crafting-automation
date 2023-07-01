@@ -40,7 +40,15 @@
                     "verified": "5.0.2"
                 }
             }
-        ]
+        ],
+        "recommends": [{
+            "id": "heroic-crafting",
+            "type": "module",
+            "manifest": "https://raw.githubusercontent.com/hivefrog-studio/heroic-crafting-foundry-module/master/module.json",
+            "compatibility": {
+              "verified": "1.0.1"
+            }
+          }]
     },
     "packs": [
         {
@@ -64,7 +72,7 @@
         {
           "name": "PF2E Heroic Crafting (Automation)",
           "sorting": "a",
-          "color": "#a88400",
+          "color": "#54a800",
           "packs": [
             "heroic-crafting-automation-items",
             "heroic-crafting-automation-macros"
