@@ -5,7 +5,7 @@
     "url": "https://github.com/Cerapter/pf2e-heroic-crafting-automation",
     "manifest": "https://raw.githubusercontent.com/Cerapter/pf2e-heroic-crafting-automation/master/module.json",
     "download": "https://github.com/Cerapter/pf2e-heroic-crafting-automation/raw/v1.0/main.zip",
-    "version": "1.0",
+    "version": "2.0",
     "authors": [
         {
             "name": "Cerapter",
@@ -13,8 +13,8 @@
         }
     ],
     "compatibility": {
-        "minimum": "10",
-        "verified": "10.291"
+        "minimum": "11",
+        "verified": "11"
     },
     "esmodules": [
         "scripts/config.js"
@@ -36,27 +36,39 @@
                 "type": "system",
                 "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
-                    "minimum": "4.8.3"
+                    "minimum": "5.0.0",
+                    "verified": "5.0.2"
                 }
             }
         ]
     },
     "packs": [
         {
-            "label": "Heroic Crafting (Automation) - Items",
-            "name": "heroic-crafting-items",
+            "label": "HC Automation - Items",
+            "name": "heroic-crafting-automation-items",
             "system": "pf2e",
             "path": "packs/items.db",
             "type": "Item",
             "private": false
         },
         {
-            "label": "Heroic Crafting (Automation) - Macros",
-            "name": "heroic-crafting-macros",
+            "label": "HC Automation - Macros",
+            "name": "heroic-crafting-automation-macros",
             "system": "pf2e",
             "path": "packs/macros.db",
             "type": "Macro",
             "private": false
         }
-    ]
+    ],
+    "packFolders": [
+        {
+          "name": "PF2E Heroic Crafting (Automation)",
+          "sorting": "a",
+          "color": "#a88400",
+          "packs": [
+            "heroic-crafting-automation-items",
+            "heroic-crafting-automation-macros"
+          ]
+        }
+      ]
 }
