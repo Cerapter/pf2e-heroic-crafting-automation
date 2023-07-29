@@ -28,8 +28,11 @@ export function normaliseCoins(copperValue, ignorePlatinums = true) {
  * 
  * @param {game.pf2e.Coins} minuend The Coins object that you are subtracting from. 
  * @param {game.pf2e.Coins} subtrahend The Coins object that you are substracting.
- * @returns {game.pf2e.Coins} A new Coins object that is the difference of the minuend and subtrahend.
+ * @returns {game.pf2e.Coins | null} A new Coins object that is the difference of the minuend and subtrahend.
+ * Returns null if the value would be negative because of a new PR to the system that literally stops you from
+ * making negative Coins.
  */
 export function subtractCoins(minuend, subtrahend) {
-    return normaliseCoins(minuend.copperValue - subtrahend.copperValue);
+    const copperValue = minuend.copperValue - subtrahend.copperValue;
+    return copperValue >= 0 ? normaliseCoins(copperValue) : null;
 }

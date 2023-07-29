@@ -87,9 +87,9 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
                     const remainingSpending = subtractCoins(maxCost, currentSpending);
 
                     const form = $(event.target).parent().parent();
-                    form.find("[id=remainingMaterials]").html(remainingSpending.toString());
+                    form.find("[id=remainingMaterials]").html(!!remainingSpending ? remainingSpending.toString() : maxCost.toString());
 
-                    if (remainingSpending.copperValue < 0) {
+                    if (remainingSpending === null) {
                         $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").attr("disabled", "true");
                         form.find("[id=spanNotOverspending]").attr("hidden", true);
                         form.find("[id=spanOverspending]").removeAttr("hidden");
@@ -278,9 +278,9 @@ export async function projectCraftDialog(actor, itemDetails) {
                     const remainingSpending = subtractCoins(maxCost, currentSpending);
 
                     const form = $(event.target).parent().parent();
-                    form.find("[id=remainingMaterials]").html(remainingSpending.toString());
+                    form.find("[id=remainingMaterials]").html(!!remainingSpending ? remainingSpending.toString() : maxCost.toString());
 
-                    if (remainingSpending.copperValue < 0) {
+                    if (remainingSpending === null) {
                         $(event.target).parent().parent().parent().siblings(".dialog-buttons").find(".ok").attr("disabled", "true");
                         form.find("[id=spanNotOverspending]").attr("hidden", true);
                         form.find("[id=spanOverspending]").removeAttr("hidden");

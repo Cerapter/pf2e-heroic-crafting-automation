@@ -64,7 +64,7 @@ export function payWithTroves(troves, CoinsToPay, fullCommit = true) {
     let updates = [];
     let remainingPayment = CoinsToPay;
 
-    if (subtractCoins(getTroveValue(troves), CoinsToPay).copperValue < 0 && fullCommit) {
+    if (subtractCoins(getTroveValue(troves), CoinsToPay) === null && fullCommit) {
         return {
             canPay: false,
             updates
@@ -83,8 +83,8 @@ export function payWithTroves(troves, CoinsToPay, fullCommit = true) {
     );
 
     let i = 0;
-    while (i < troveSummaries.length && remainingPayment.copperValue > 0) {
-        const removeFromTrove = subtractCoins(troveSummaries[i].value, remainingPayment).copperValue < 0 ? troveSummaries[i].value : remainingPayment;
+    while (i < troveSummaries.length && !!remainingPayment && remainingPayment.copperValue > 0) {
+        const removeFromTrove = subtractCoins(troveSummaries[i].value, remainingPayment) === null ? troveSummaries[i].value : remainingPayment;
         const remainsInTrove = subtractCoins(troveSummaries[i].value, removeFromTrove);
         const newTroveData = changeTroveValue(troveSummaries[i].level, remainsInTrove);
 
@@ -99,7 +99,7 @@ export function payWithTroves(troves, CoinsToPay, fullCommit = true) {
         i++;
     }
 
-    if (remainingPayment.copperValue > 0 && fullCommit) {
+    if (!!remainingPayment && remainingPayment.copperValue > 0 && fullCommit) {
         return {
             canPay: false,
             updates: []
@@ -138,7 +138,7 @@ export function payWithCoinsAndTrove(paymentOption, actorCoins, troves, costCoin
         case "fullCoin":
             {
                 const payment = subtractCoins(costCoins, actorCoins);
-                if (payment.copperValue <= 0) {
+                if (payment === null || payment.copperValue === 0) {
                     canPay = true;
                     removeCopper = costCoins.copperValue;
                 }
@@ -147,7 +147,7 @@ export function payWithCoinsAndTrove(paymentOption, actorCoins, troves, costCoin
         case "preferCoin":
             {
                 const payment = subtractCoins(costCoins, actorCoins);
-                if (payment.copperValue <= 0) {
+                if (payment === null || payment.copperValue === 0) {
                     canPay = true;
                     removeCopper = costCoins.copperValue;
                 } else {
@@ -168,8 +168,9 @@ export function payWithCoinsAndTrove(paymentOption, actorCoins, troves, costCoin
                 } else {
                     const partialPayment = payWithTroves(troves, costCoins, false);
                     const coinsNeeded = subtractCoins(costCoins, getTroveValue(troves));
+                    const remainingPayment = subtractCoins(coinsNeeded, actorCoins);
 
-                    if (subtractCoins(coinsNeeded, actorCoins).copperValue <= 0) {
+                    if (remainingPayment === null || remainingPayment.copperValue === 0) {
                         canPay = true;
                         removeCopper = coinsNeeded.copperValue;
                         troveUpdates = partialPayment.updates;
