@@ -22,16 +22,17 @@
         {{#each projects as |project|}}
             <li class="item formula-item heroic-project-item" data-formula-lvl="{{lvl}}" data-project-id="{{project.projectUuid}}" data-item-id="{{project.itemUuid}}" data-is-formula="true">
                 <div class="item-name rollable">
-                    <div class="item-image">
+                    <div class="item-image framed">
                         <img class="item-icon" src="{{project.img}}" alt="{{project.name}}">
+                        <i class="fa-solid fa-message"></i>
                     </div>
                     <h4>{{project.name}}</h4>
                 </div>
-                <div class="formula-dc">
+                <div class="dc">
                     {{project.DC}}
                 </div>
-                <div class="formula-quantity">
-                    <input type="number" class="formula-number" data-action="enter-quantity" value="{{project.batch}}" readonly />
+                <div class="quantity">
+                    <input type="number" class="number" data-action="enter-quantity" value="{{project.batch}}" readonly />
                 </div>
                 {{#if @root.editable}}
                     <div class="item-controls heroic-crafting-project-controls">

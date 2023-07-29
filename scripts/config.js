@@ -76,14 +76,16 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         itemControls.find("a[data-action=heroic-crafting-begin-project]").on("click", async (event) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
             const DC =
-                Number($(event.currentTarget).parent().siblings(".formula-dc").html()) || 14; // Level 0 DC
+                Number($(event.currentTarget).parent().siblings(".dc").html()) || 14; // Level 0 DC
             const batchSize =
-                Number($(event.currentTarget).parent().siblings(".formula-quantity").children("input").val()) || 1;
+                Number($(event.currentTarget).parent().siblings(".quantity").children("input").val()) || 1;
             const itemDetails = {
                 UUID,
                 batchSize,
                 DC
             };
+
+            console.log(itemDetails);
 
             await beginAProject(data.actor, itemDetails, false);
         });
@@ -116,7 +118,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
             const projectUUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
             const itemUUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
             const batchSize =
-                Number($(event.currentTarget).parent().siblings(".formula-quantity").children("input").val()) || 1;
+                Number($(event.currentTarget).parent().siblings(".quantity").children("input").val()) || 1;
             const itemDetails = {
                 UUID: itemUUID,
                 projectUUID,
@@ -130,8 +132,8 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         //! Add "rollable" to-chat button
         const projects = craftingTab.find("[data-container-type=heroicCraftingProjects]").find(".formula-item");
 
-        projects.find(".rollable").on("click", async (event) => {
-            const projectUUID = $(event.currentTarget).parent().attr("data-project-id") || "";
+        projects.find(".item-image").on("click", async (event) => {
+            const projectUUID = $(event.currentTarget).parent().parent().attr("data-project-id") || "";
 
             await projectToChat(data.actor, projectUUID);
         });
