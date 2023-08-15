@@ -27,6 +27,15 @@ Hooks.on(
             type: Number,
         });
 
+        game.settings.register(MODULE_NAME, "scaleWithBatchSize", {
+            name: localise("Config.ScaleWithBatchSize.Name"),
+            hint: localise("Config.ScaleWithBatchSize.Hint"),
+            scope: "world",
+            config: true,
+            default: 5,
+            type: Boolean,
+        });
+
         game.pf2eHeroicCrafting = {
             HeroicCraftingHourlySpendingLimit,
             HeroicCraftingGatheredIncome,

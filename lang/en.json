@@ -8,6 +8,10 @@
             "DaysInAWeek": {
                 "Name": "Days in a Week",
                 "Hint": "The amount of days a week is used as a shorthand for for spending limit purposes, and implicitly also the amount of days in a week you can craft without Working Overtime."
+            },
+            "ScaleWithBatchSize": {
+                "Name": "Scale with Batch size",
+                "Hint": "Calculates the size of the batch into the max spending limit e.g. when you craft elixers of life the batch size is 4 and therefore the spending limit will be multiplied by 4."
             }
         },
         "CharSheet": {

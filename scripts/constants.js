@@ -36,7 +36,7 @@ export const HeroicCraftingGatheredIncome = [
  * Calculates the appropriate spending limit for a level.
  * 
  * @param {"hour"|"day"|"week"} spendingLimitDuration The duration of the crafting activity to calculate the spending limit for.
- * @param {number} level The leve at which the activity is performed.
+ * @param {number} level The level at which the activity is performed.
  * @returns {game.pf2e.Coins} A Coins object of the appropriate spending limit.
  */
 export function spendingLimit(spendingLimitDuration, level) {
@@ -49,19 +49,39 @@ export function spendingLimit(spendingLimitDuration, level) {
     const dayMultiplier = game.settings.get(MODULE_NAME, "hoursInADay") || 4;
     const weekMultiplier = game.settings.get(MODULE_NAME, "daysInAWeek") || 5;
 
-    switch (spendingLimitDuration) {
-        case "Hour":
-        case "hour":
+    switch (spendingLimitDuration.toUpperCase()) {
+        case "HOUR":
             return hourlyLimit;
-        case "Day":
-        case "day":
+        case "DAY":
             return normaliseCoins(hourlyLimit.scale(dayMultiplier).copperValue);
-        case "Week":
-        case "week":
+        case "WEEK":
             return normaliseCoins(hourlyLimit.scale(dayMultiplier).scale(weekMultiplier).copperValue);
         default:
             return new game.pf2e.Coins();
     }
+}
+
+/**
+ * Calculates the appropriate max costs considering duration, level, batch size and other multipliers.
+ * 
+ * @param {"hour"|"day"|"week"} spendingLimitDuration The duration of the crafting activity to calculate the spending limit for.
+ * @param {number} level The level at which the activity is performed.
+ * @param {number} batchSize Size of the batch thats being crafted.
+ * @param {number} multipliers Other multipliers.
+ * @returns {game.pf2e.Coins} A Coins object of the appropriate spending limit.
+ */
+export function calculateMaxCost(duration, level, batchSize, multipliers) {
+    let maxCost = spendingLimit(duration, level);
+
+    const scaleWithBatch = game.settings.get(MODULE_NAME, "scaleWithBatchSize");
+
+    if (scaleWithBatch) {
+        maxCost = maxCost.scale(batchSize);
+    }
+
+    maxCost = maxCost.scale(multipliers)
+    
+    return normaliseCoins(maxCost.copperValue);
 }
 
 /**
