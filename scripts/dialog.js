@@ -79,6 +79,9 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
             }
         },
         default: "ok",
+        close: (html) => {
+            return {};
+        },
         render: ([content]) => {
             content
                 .querySelector("[id=spendingAmount]")
@@ -252,6 +255,7 @@ export async function projectCraftDialog(actor, itemDetails) {
         close: (html) => {
             actor.synthetics["CraftingOption"] = [];
             actor.synthetics["ModifyCraftAProject"] = [];
+            return {};
         },
         render: ([content]) => {
             content
@@ -404,7 +408,10 @@ export async function projectEditDialog(projectDetails) {
                 icon: "<i class='fa-solid fa-ban'></i>",
             }
         },
-        default: "ok"
+        default: "ok",
+        close: (html) => {
+            return {};
+        }
     }, { width: 350 });
 }
 
