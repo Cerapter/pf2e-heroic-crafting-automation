@@ -11,7 +11,7 @@
             },
             "ScaleWithBatchSize": {
                 "Name": "Scale with Batch size",
-                "Hint": "Calculates the size of the batch into the max spending limit e.g. when you craft elixers of life the batch size is 4 and therefore the spending limit will be multiplied by 4."
+                "Hint": "If true, the Maximum Cost of the Craft a Project activity will be multiplied by the batch size."
             }
         },
         "CharSheet": {
