@@ -8,6 +8,10 @@
             "DaysInAWeek": {
                 "Name": "Days in a Week",
                 "Hint": "The amount of days a week is used as a shorthand for for spending limit purposes, and implicitly also the amount of days in a week you can craft without Working Overtime."
+            },
+            "ScaleWithBatchSize": {
+                "Name": "Scale with Batch size",
+                "Hint": "If true, the Maximum Cost of the Craft a Project activity will be multiplied by the batch size."
             }
         },
         "CharSheet": {

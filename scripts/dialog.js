@@ -1,5 +1,5 @@
 import { normaliseCoins, subtractCoins } from "./coins.js";
-import { CheckFeat, getPreferredPayMethod, localise, MODULE_NAME, spendingLimit } from "./constants.js";
+import { CheckFeat, getPreferredPayMethod, localise, MODULE_NAME, calculateMaxCost } from "./constants.js";
 
 /**
  * Generates a form group HTML for choosing a paying method (for beginning or crafting projets).
@@ -268,7 +268,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                         }
                     });
 
-                    const maxCost = normaliseCoins(spendingLimit(event.target.value, actor.level).scale(itemDetails.batchSize).scale(multipliers).copperValue);
+                    const maxCost = calculateMaxCost(event.target.value, actor.level, itemDetails.batchSize, multipliers);
                     $(event.target).parent().parent().find("[id=maxCost]").html(maxCost.toString());
 
                     event.target.parentElement.parentElement.querySelector("#spendingAmount").dispatchEvent(new Event("keyup"));
@@ -340,7 +340,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                     multipliers = multipliers * modifier.amount;
                 }
             });
-            const maxCost = spendingLimit("Hour", actor.level).scale(itemDetails.batchSize).scale(multipliers);
+            const maxCost = calculateMaxCost("Hour", actor.level, itemDetails.batchSize, multipliers);
             content
                 .querySelector("[id=maxCost]").innerHTML = maxCost;
             content
