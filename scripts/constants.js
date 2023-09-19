@@ -66,7 +66,7 @@ export function spendingLimit(spendingLimitDuration, level) {
  * 
  * @param {"hour"|"day"|"week"} spendingLimitDuration The duration of the crafting activity to calculate the spending limit for.
  * @param {number} level The level at which the activity is performed.
- * @param {number} batchSize Size of the batch thats being crafted.
+ * @param {number} batchSize Size of the batch that's being crafted.
  * @param {number} multipliers Other multipliers.
  * @returns {game.pf2e.Coins} A Coins object of the appropriate spending limit.
  */

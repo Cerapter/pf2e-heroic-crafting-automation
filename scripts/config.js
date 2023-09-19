@@ -32,7 +32,7 @@ Hooks.on(
             hint: localise("Config.ScaleWithBatchSize.Hint"),
             scope: "world",
             config: true,
-            default: 5,
+            default: true,
             type: Boolean,
         });
 
