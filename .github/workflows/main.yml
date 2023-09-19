@@ -31,8 +31,8 @@ jobs:
     - name: Package up the pack files
       id: fvtt_run
       run: | 
-          npx @foundryvtt/foundryvtt-cli package --id=./src/macros --od=./packs pack macros
-          npx @foundryvtt/foundryvtt-cli package --id=./src/items --od=./packs pack items
+          npx @foundryvtt/foundryvtt-cli@0.0.9 package --id=./src/macros --od=./packs pack macros
+          npx @foundryvtt/foundryvtt-cli@0.0.9 package --id=./src/items --od=./packs pack items
 
     # Create a zip file with all files required by the module to add to the release
     - run: zip -r ./module.zip module.json README.md styles/ scripts/ lang/ templates/ packs/
