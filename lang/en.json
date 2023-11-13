@@ -53,7 +53,7 @@
                 "LacksPermissionToFinish": "<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to {name}, as {playerName} does not have permissions to edit said actor."
             },
             "Roll": {
-                "Success": "<p><strong>Sucess</strong> You work productively during this period. Add double this activity's Cost to the project's Current Value.</p>",
+                "Success": "<p><strong>Success</strong> You work productively during this period. Add double this activity's Cost to the project's Current Value.</p>",
                 "Failure": "<p><strong>Failure</strong> You work unproductively during this period. Add half this activity's Cost to the project's Current Value.</p>",
                 "CriticalFailure": "<p><strong>Critical Failure</strong> You ruin your materials and suffer a setback while crafting. Deduct this activity's Cost from the project's Current Value. If this reduces the project's Current Value below 0, the project is ruined and must be started again.</p>",
                 "Overtime": "Overtime"
