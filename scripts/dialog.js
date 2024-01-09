@@ -410,7 +410,11 @@ export async function projectEditDialog(projectDetails) {
         },
         default: "ok",
         close: (html) => {
-            return {};
+            return {
+                progressInCopper: projectDetails.progressInCopper,
+                DC: projectDetails.DC,
+                batchSize: projectDetails.batchSize
+            };
         }
     }, { width: 350 });
 }
