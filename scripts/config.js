@@ -83,7 +83,7 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
         itemControls.prepend(`<a class="item-control" title="${localise("CharSheet.BeginProject")}" data-action="heroic-crafting-begin-project"><i class="fa-solid fa-fw fa-scroll"></i></a>`);
 
         itemControls.find("a[data-action=heroic-crafting-begin-project]").on("click", async (event) => {
-            const UUID = $(event.currentTarget).parent().parent().attr("data-item-id") || "";
+            const UUID = $(event.currentTarget).parent().parent().attr("data-item-uuid") || "";
             const DC =
                 Number($(event.currentTarget).parent().siblings(".dc").html()) || 14; // Level 0 DC
             const batchSize =
@@ -94,14 +94,12 @@ Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
                 DC
             };
 
-            console.log(itemDetails);
-
             await beginAProject(data.actor, itemDetails, false);
         });
     }
     {
         //! Adding Heroic Crafting projects
-        const craftingEntries = craftingTab.find(".craftingEntry-list");
+        const craftingEntries = craftingTab.find(".crafting-entry-list");
         const projects = await getProjectsToDisplay(data.actor);
 
         const template = await renderTemplate(`modules/${MODULE_NAME}/templates/projects.hbs`, { projects, editable: data.isEditable });

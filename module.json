@@ -5,7 +5,7 @@
     "url": "https://github.com/Cerapter/pf2e-heroic-crafting-automation",
     "manifest": "https://raw.githubusercontent.com/Cerapter/pf2e-heroic-crafting-automation/master/module.json",
     "download": "https://github.com/Cerapter/pf2e-heroic-crafting-automation/raw/v1.0/main.zip",
-    "version": "2.0",
+    "version": "2.1",
     "authors": [
         {
             "name": "Cerapter",
@@ -36,8 +36,8 @@
                 "type": "system",
                 "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
-                    "minimum": "5.0.0",
-                    "verified": "5.0.2"
+                    "minimum": "5.12.3",
+                    "verified": "5.12.3"
                 }
             }
         ],
