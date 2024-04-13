@@ -13,7 +13,7 @@ class CraftingOptionRuleElement extends game.pf2e.RuleElement {
                 item: item.name,
                 origin: item.isOfType("effect") ? item.origin?.name ?? null : null,
             })
-            : item.slug;
+            : item.slug?.trim() || game.pf2e.system.sluggify(item.name);
     }
 
     static defineSchema() {

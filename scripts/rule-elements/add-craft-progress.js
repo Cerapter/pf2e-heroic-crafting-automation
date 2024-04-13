@@ -28,12 +28,12 @@ class AddCraftProgressRuleElement extends game.pf2e.RuleElement {
             amount: new ResolvableValueField({
                 required: false,
                 nullable: false,
-                initial: undefined
+                initial: 1
             }),
             level: new ResolvableValueField({
                 required: false,
                 nullable: false,
-                initial: undefined
+                initial: '@actor.level'
             }),
             mode: new fields.StringField({
                 required: false,
