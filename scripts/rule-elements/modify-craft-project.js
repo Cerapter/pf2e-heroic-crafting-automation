@@ -53,7 +53,15 @@ class ModifyCraftAProjectRuleElement extends game.pf2e.RuleElement {
         const rollOptions = this.actor.getRollOptions().concat(item.getRollOptions(ROLLOPTION_ITEM_PREFIX));
         if (!this.test(rollOptions)) return;
 
-        const synthetic = { amount: this.amount, mode: this.mode, target: this.target, toggledBy: this.toggledBy };
+        let resolvedAmount = "";
+
+        if (this.mode === "override") {
+            resolvedAmount = String(this.resolveValue(this.amount, ""));
+        } else if (this.mode === "multiply") {
+            resolvedAmount = Number(this.resolveValue(this.amount, 1));
+        }
+
+        const synthetic = { amount: resolvedAmount, mode: this.mode, target: this.target, toggledBy: this.toggledBy };
 
         if ("ModifyCraftAProject" in this.actor.synthetics) {
             this.actor.synthetics["ModifyCraftAProject"].push(synthetic);

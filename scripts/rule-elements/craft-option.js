@@ -50,10 +50,11 @@ class CraftingOptionRuleElement extends game.pf2e.RuleElement {
 
         const synthetic = {
             label: this.label,
-            value: this.value, 
-            desc: this.desc, 
-            toggleable: 
-            this.toggleable, 
+            value: this.value,
+            desc: this.resolveInjectedProperties(
+                String(this.resolveValue(this.desc, "", { evaluate: false })),
+            ).trim(),
+            toggleable: this.toggleable,
             default: this.default
         };
 
