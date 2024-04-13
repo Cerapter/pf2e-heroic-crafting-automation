@@ -37,7 +37,7 @@
                 "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
                     "minimum": "5.12.3",
-                    "verified": "5.12.3"
+                    "verified": "5.15.0"
                 }
             }
         ],
@@ -72,7 +72,6 @@
         {
           "name": "PF2E Heroic Crafting (Automation)",
           "sorting": "a",
-          "color": "#54a800",
           "packs": [
             "heroic-crafting-automation-items",
             "heroic-crafting-automation-macros"

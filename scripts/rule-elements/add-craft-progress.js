@@ -3,46 +3,66 @@ import { spendingLimit } from "../constants.js";
 class AddCraftProgressRuleElement extends game.pf2e.RuleElement {
     static validActorTypes = ["character"];
 
-    constructor(data, item, options = null) {
-        super(data, item, options);
+    constructor(source, options) {
+        super(source, options);
 
-        if (this.#isValid(data)) {
-            this.amount = this.resolveValue(data.amount ?? 1);
-            this.level = this.resolveValue(data.level ?? this.actor.level);
-            this.duration = data.duration;
-            this.mode = data.mode;
-            this.outcome = data.outcome;
+        if (this.duration && this.mode) {
+            this.failValidation("must either have duration or mode, not both");
         }
     }
 
-    #isValid(data) {
-        if (data.duration && !(typeof data.duration === "string" && ["hour", "day", "week"].includes(data.duration))) {
-            this.failValidation(`An Add Craft Progress rule element's duration must either be "hour", "day", or "week"!`);
-            return false;
-        }
-        if (data.mode && !(typeof data.mode === "string" && ["multiply"].includes(data.mode))) {
-            this.failValidation(`An Add Craft Progress rule element's mode must be "multiply"!`);
-            return false;
-        }
+    static defineSchema() {
+        const { fields } = foundry.data;
 
-        return true;
+        const rollOptionSchema = game.pf2e.RuleElements.builtin.RollOption.defineSchema();
+        const ResolvableValueField = rollOptionSchema.value.constructor;
+
+        return {
+            ...super.defineSchema(),
+            duration: new fields.StringField({
+                required: true,
+                nullable: false,
+                blank: false,
+                choices: ['hour', 'day', 'week'],
+            }),
+            amount: new ResolvableValueField({
+                required: false,
+                nullable: false,
+                initial: undefined
+            }),
+            level: new ResolvableValueField({
+                required: false,
+                nullable: false,
+                initial: undefined
+            }),
+            mode: new fields.StringField({
+                required: false,
+                nullable: false,
+                blank: false,
+                choices: ['multiply'],
+            }),
+            outcome: new fields.ArrayField(
+                new fields.StringField({
+                    required: true,
+                    blank: false,
+                    choices: ["criticalFailure", "failure", "success", "criticalSuccess"]
+                }),
+                {
+                    required: false,
+                    nullable: false,
+                    initial: undefined
+                },
+            ),
+        }
     }
 
-    _validateModel(data) {
-        super._validateModel(data);
-
-        if (data.duration && data.mode) {
-            throw Error("must either have duration or mode, not both");
-        }
-    }
-
-    beforeRoll(domains, rollOptions) {
+    beforeRoll(_domains, rollOptions) {
         if (!this.test(rollOptions)) return;
+        if (this.ignored) return;
 
         const synthetic = this.duration ?
             { coins: spendingLimit(this.duration, this.level).scale(this.amount), outcome: this.outcome } :
             { mode: this.mode, amount: this.amount, outcome: this.outcome };
-
 
         if ("AddCraftProgress" in this.actor.synthetics) {
             this.actor.synthetics["AddCraftProgress"].push(synthetic);

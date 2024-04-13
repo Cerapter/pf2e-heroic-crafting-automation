@@ -22,9 +22,9 @@ export function getTroveValue(troves) {
 
     troves.map(trove => {
         return game.pf2e.Coins.fromPrice(trove.system.price, trove.system.quantity)
-            .add(game.pf2e.Coins.fromString(trove.flags[MODULE_NAME]?.leftovers || "0 gp"))
+            .plus(game.pf2e.Coins.fromString(trove.flags[MODULE_NAME]?.leftovers || "0 gp"))
     }).forEach(indVal => {
-        accumulatedValue = accumulatedValue.add(indVal);
+        accumulatedValue = accumulatedValue.plus(indVal);
     });
 
     return accumulatedValue;

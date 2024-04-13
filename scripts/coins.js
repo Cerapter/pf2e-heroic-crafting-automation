@@ -24,7 +24,7 @@ export function normaliseCoins(copperValue, ignorePlatinums = true) {
 
 /**
  * Given two Coins objects, subtracts one from the other.
- * I tried game.pf2e.Coins.add() with negatives, but it gives back denominations with minus values. :weary:
+ * I tried game.pf2e.Coins.plus() with negatives, but it gives back denominations with minus values. :weary:
  * 
  * @param {game.pf2e.Coins} minuend The Coins object that you are subtracting from. 
  * @param {game.pf2e.Coins} subtrahend The Coins object that you are substracting.

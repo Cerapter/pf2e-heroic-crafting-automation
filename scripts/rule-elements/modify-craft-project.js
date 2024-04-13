@@ -3,39 +3,50 @@ import { ROLLOPTION_ITEM_PREFIX } from "../constants.js";
 class ModifyCraftAProjectRuleElement extends game.pf2e.RuleElement {
     static validActorTypes = ["character"];
 
-    constructor(data, item, options = null) {
-        super(data, item, options);
+    constructor(source, options) {
+        super(source, options);
 
-        if (this.#isValid(data)) {
-            this.amount = this.resolveValue(data.amount ?? 1);
-            this.mode = data.mode;
-            this.target = data.target;
-            this.toggledBy = data.toggledBy;
+        if (this.mode === "override" && !(["skill"].includes(this.target))) {
+            this.failValidation(`"override" mode can only be used with the "skill" target!`);
+        }
+
+        if (this.mode === "multiply" && ["skill"].includes(this.target)) {
+            this.failValidation(`"multiply" mode cannot be used with the "skill" target!`);
         }
     }
 
-    #isValid(data) {
-        if (!(typeof data.mode === "string" && ["multiply", "override"].includes(data.mode))) {
-            this.failValidation(`A Modify Craft a Project rule element's mode must either be "multiply" or "override"!`);
-            return false;
-        }
+    static defineSchema() {
+        const { fields } = foundry.data;
 
-        if (!(typeof data.target === "string" && ["rushCost", "max", "skill"].includes(data.target))) {
-            this.failValidation(`A Modify Craft a Project rule element's target must be either be "rushCost", "max", or "skill"!`);
-            return false;
-        }
+        const rollOptionSchema = game.pf2e.RuleElements.builtin.RollOption.defineSchema();
+        const ResolvableValueField = rollOptionSchema.value.constructor;
 
-        if (data.mode === "override" && !(["skill"].includes(data.target))) {
-            this.failValidation(`"override" mode can only be used with the "skill" target!`);
-            return false;
+        return {
+            ...super.defineSchema(),
+            mode: new fields.StringField({
+                required: true,
+                nullable: false,
+                blank: false,
+                choices: ['multiply', 'override'],
+            }),
+            target: new fields.StringField({
+                required: true,
+                nullable: false,
+                blank: false,
+                choices: ['rushCost', 'max', 'skill'],
+            }),
+            amount: new ResolvableValueField({
+                required: false,
+                nullable: false,
+                initial: undefined
+            }),
+            toggledBy: new fields.StringField({
+                required: false,
+                nullable: false,
+                blank: false,
+                initial: undefined
+            }),
         }
-
-        if (data.mode === "multiply" && ["skill"].includes(data.target)) {
-            this.failValidation(`"multiply" mode cannot be used with the "skill" target!`);
-            return false;
-        }
-
-        return true;
     }
 
     preCraft(item) {

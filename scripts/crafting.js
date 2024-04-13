@@ -136,7 +136,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
 
     for (const toggle in dialogResult.toggles) {
         if (dialogResult.toggles.hasOwnProperty(toggle)) {
-            rushCosts = rushCosts.add(game.pf2e.Coins.fromString(dialogResult.toggles[toggle].rushCost));
+            rushCosts = rushCosts.plus(game.pf2e.Coins.fromString(dialogResult.toggles[toggle].rushCost));
         }
     }
 
@@ -144,7 +144,7 @@ export async function craftAProject(crafterActor, itemDetails, skipDialog = true
         dialogResult.payMethod,
         crafterActor.inventory.coins,
         getTroves(crafterActor),
-        dialogResult.spendingAmount.add(rushCosts));
+        dialogResult.spendingAmount.plus(rushCosts));
 
     await setPreferredPayMethod(crafterActor, dialogResult.payMethod);
 
@@ -307,7 +307,7 @@ async function rollCraftAProject(crafterActor, project, details) {
                     progressMade: new game.pf2e.Coins(),
                     progressCost: details.craftingMaterials,
                     rushCost: details.rushCosts,
-                    overallCost: details.craftingMaterials.add(details.rushCosts),
+                    overallCost: details.craftingMaterials.plus(details.rushCosts),
                     projectUuid: project.ID,
                     actor: details.projectOwner.id
                 };
@@ -329,7 +329,7 @@ async function rollCraftAProject(crafterActor, project, details) {
                             synthetic.outcome.length === 0 ||
                             synthetic.outcome.includes(outcome)) {
                             if (synthetic.coins) {
-                                craftDetails.progressMade = craftDetails.progressMade.add(synthetic.coins);
+                                craftDetails.progressMade = craftDetails.progressMade.plus(synthetic.coins);
                             } else {
                                 switch (synthetic.mode) {
                                     case "multiply":

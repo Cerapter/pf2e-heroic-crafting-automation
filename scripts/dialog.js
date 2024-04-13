@@ -149,17 +149,13 @@ export async function projectCraftDialog(actor, itemDetails) {
 
     if ("CraftingOption" in actor.synthetics) {
         for (const synthetic of actor.synthetics["CraftingOption"]) {
-            const key = synthetic.label
-                .replace(/([a-z])([A-Z])/g, "$1-$2")
-                .replace(/[\s_]+/g, '-')
-                .toLowerCase();
             const checked = synthetic.default ? "checked" : "";
             const disabled = synthetic.toggleable ? "" : "disabled";
 
             extraHTML.push(`
             <div class="form-group extra-craft-modifiers" >
-                <label for="${key}">${synthetic.label} <strong style="color: red" hidden></strong></label>
-                <input type="checkbox" id="${key}" name="${key}" ${checked} ${disabled}>
+                <label for="${synthetic.value}">${synthetic.label} <strong style="color: red" hidden></strong></label>
+                <input type="checkbox" id="${synthetic.value}" name="${synthetic.value}" ${checked} ${disabled}>
             </div>
             <p class="notes">${synthetic.desc}</p>
         `);

@@ -4,9 +4,10 @@ import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 import { projectToChat } from "./dialog.js";
 import { hardcodeRules } from "./hardcoder.js";
+//import { AddCraftProgressRuleElement } from "./rule-elements/add-craft-progress.js";
 
 /// Exposes the various functions and constants for usage in macros.
-Hooks.on(
+Hooks.once(
     "init",
     async () => {
         game.settings.register(MODULE_NAME, "hoursInADay", {
@@ -49,20 +50,19 @@ Hooks.on(
             payWithTroves
         };
 
-        game.pf2e.RuleElements.custom["AddCraftProgress"] = (await import("./rule-elements/add-craft-progress.js")).AddCraftProgressRuleElement;
-        CONFIG.PF2E.ruleElement["AddCraftProgress"] = "PF2E.RuleElement.AddCraftProgress";
+        game.pf2e.RuleElements.custom.AddCraftProgress = (await import("./rule-elements/add-craft-progress.js")).AddCraftProgressRuleElement;
 
-        game.pf2e.RuleElements.custom["CraftingOption"] = (await import("./rule-elements/craft-option.js")).CraftingOptionRuleElement;
-        CONFIG.PF2E.ruleElement["CraftingOption"] = "PF2E.RuleElement.CraftingOption";
+        
+        game.pf2e.RuleElements.custom.CraftingOption = (await import("./rule-elements/craft-option.js")).CraftingOptionRuleElement;
 
-        game.pf2e.RuleElements.custom["ModifyCraftAProject"] = (await import("./rule-elements/modify-craft-project.js")).ModifyCraftAProjectRuleElement;
-        CONFIG.PF2E.ruleElement["ModifyCraftAProject"] = "PF2E.RuleElement.ModifyCraftAProject";
+        game.pf2e.RuleElements.custom.ModifyCraftAProject = (await import("./rule-elements/modify-craft-project.js")).ModifyCraftAProjectRuleElement;
     }
 );
 
 /// "Hardcodes" Heroic Crafting feat rules by sneakily replacing them when they're placed on the actors.
 Hooks.on("createItem", async (item) => {
     const sourceID = item.flags.core?.sourceId ?? "";
+
     if (sourceID in hardcodeRules) {
         if (hardcodeRules[sourceID].check(item)) {
             const keepOldRules = hardcodeRules[sourceID].deleteOldRules ? [] : item.system.rules;

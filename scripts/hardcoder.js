@@ -1,7 +1,7 @@
 export const hardcodeRules = {
     "Compendium.heroic-crafting.feats.Item.GNYDY7NsX0O8BcLw": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting")
+            return (item.rules[0].selector[0] === "crafting")
         },
         deleteOldRules: true,
         newrules: [
@@ -49,7 +49,7 @@ export const hardcodeRules = {
     },
     "Compendium.heroic-crafting.feats.Item.Bt7VlbJdvdjarCEI": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting")
+            return (item.rules[0].selector[0] === "crafting")
         },
         deleteOldRules: true,
         newrules: [
@@ -146,7 +146,7 @@ export const hardcodeRules = {
     },
     "Compendium.heroic-crafting.feats.Item.7GEXIP3cKDxu2Tw9": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting")
+            return (item.rules[0].selector[0] === "crafting")
         },
         deleteOldRules: true,
         newrules: [
@@ -190,7 +190,7 @@ export const hardcodeRules = {
     },
     "Compendium.pf2e.feats-srd.Item.PiUe3tpv7UVtnfvS": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting" &&
+            return (item.rules[0].selector[0] === "crafting" &&
                 item.system.prerequisites.value.find(
                     i => i.value === "Hyperfocus"
                 ).value === "Hyperfocus")
@@ -226,7 +226,7 @@ export const hardcodeRules = {
     },
     "Compendium.heroic-crafting.items.Item.qc0jdrtVr7R3BbY9": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting")
+            return (item.rules[0].selector[0] === "crafting")
         },
         deleteOldRules: true,
         newrules: [
@@ -246,7 +246,7 @@ export const hardcodeRules = {
     },
     "Item.J1yQte0LiN0zzbv8": {
         check: (item) => {
-            return (item.rules[0].selector === "crafting")
+            return (item.rules[0].selector[0] === "crafting")
         },
         deleteOldRules: true,
         newrules: [
