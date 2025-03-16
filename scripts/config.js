@@ -74,13 +74,14 @@ Hooks.on("createItem", async (item) => {
 /// Extends the crafting tab of the character sheet with Heroic Crafting stuff.
 Hooks.on("renderCharacterSheetPF2e", async (data, html) => {
     const craftingTab = html.find(".tab.crafting");
+    craftingTab.get(0).style.setProperty("--controls-width", "2.5rem");
     {
         //! Add Heroic Crafting "Begin a Project" button to each formula
         const formulas = craftingTab.find(".known-formulas");
         const formulaItems = formulas.find(".formula-item");
         const itemControls = formulaItems.find(".item-controls");
 
-        itemControls.prepend(`<a class="item-control" title="${localise("CharSheet.BeginProject")}" data-action="heroic-crafting-begin-project"><i class="fa-solid fa-fw fa-scroll"></i></a>`);
+        itemControls.prepend(`<a data-action="heroic-crafting-begin-project" data-tooltip="${localise("CharSheet.BeginProject")}"><i class="fa-solid fa-fw fa-scroll"></i></a>`);
 
         itemControls.find("a[data-action=heroic-crafting-begin-project]").on("click", async (event) => {
             const UUID = $(event.currentTarget).parent().parent().attr("data-item-uuid") || "";

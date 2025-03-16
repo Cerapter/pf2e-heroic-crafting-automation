@@ -54,7 +54,7 @@ export async function beginAProject(crafterActor, itemDetails, skipDialog = true
 
     const newProjects = [
         {
-            ID: randomID(),
+            ID: foundry.utils.randomID(),
             ItemUUID: itemDetails.UUID,
             progressInCopper: dialogResult.startingProgress,
             batchSize: itemDetails.batchSize || 1,
@@ -463,8 +463,7 @@ export async function getProjectsToDisplay(crafterActor) {
  * @param {string} projectUUID The UUID of the project.
  * @param {boolean} hasProgressed If true, `amount` will be added to the project's current progress.
  * If false, it will be subtracted.
- * @param {string} amount A string of the progressed value, formatted like a Coins object 
- * (so for example, "5 gp, 4 sp"). 
+ * @param {game.pf2e.Coins} amount The progressed value as a Coins object.
  * @returns 
  */
 export async function progressProject(crafterActor, projectUUID, hasProgressed, amount) {
@@ -476,12 +475,11 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         return;
     }
 
-    const coinAmount = game.pf2e.Coins.fromString(amount);
     const projectItem = await fromUuid(project.ItemUUID);
     const cost = game.pf2e.Coins.fromPrice(projectItem.price, project.batchSize);
 
     if (hasProgressed) {
-        project.progressInCopper += coinAmount.copperValue;
+        project.progressInCopper += amount.copperValue;
 
         if (project.progressInCopper >= cost.copperValue) {
             const itemObject = projectItem.toObject();
@@ -515,7 +513,7 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
                     name: crafterActor.name,
                     batchSize: project.batchSize,
                     itemName: projectItem.name,
-                    progressAmount: coinAmount.toString(),
+                    progressAmount: amount.toString(),
                     currentProgress: normaliseCoins(project.progressInCopper),
                     goal: cost.toString()
                 }),
@@ -532,7 +530,7 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
             });
         }
     } else {
-        project.progressInCopper -= coinAmount.copperValue;
+        project.progressInCopper -= amount.copperValue;
 
         if (project.progressInCopper <= 0) {
             ChatMessage.create({
@@ -548,7 +546,7 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
                     name: crafterActor.name,
                     batchSize: project.batchSize,
                     itemName: projectItem.name,
-                    progressAmount: coinAmount.toString(),
+                    progressAmount: amount.toString(),
                     currentProgress: normaliseCoins(project.progressInCopper),
                     goal: cost.toString()
                 }),

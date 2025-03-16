@@ -13,8 +13,8 @@
         }
     ],
     "compatibility": {
-        "minimum": "11",
-        "verified": "11"
+        "minimum": "12",
+        "verified": "12"
     },
     "esmodules": [
         "scripts/config.js"
@@ -36,8 +36,8 @@
                 "type": "system",
                 "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
-                    "minimum": "5.12.3",
-                    "verified": "5.15.0"
+                    "minimum": "6.0.0",
+                    "verified": "6.10.2"
                 }
             }
         ],
@@ -55,7 +55,7 @@
             "label": "HC Automation - Items",
             "name": "heroic-crafting-automation-items",
             "system": "pf2e",
-            "path": "packs/items.db",
+            "path": "packs/items",
             "type": "Item",
             "private": false
         },
@@ -63,7 +63,7 @@
             "label": "HC Automation - Macros",
             "name": "heroic-crafting-automation-macros",
             "system": "pf2e",
-            "path": "packs/macros.db",
+            "path": "packs/macros",
             "type": "Macro",
             "private": false
         }
