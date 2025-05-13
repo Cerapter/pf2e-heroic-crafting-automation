@@ -61,7 +61,7 @@ Hooks.once(
 
 /// "Hardcodes" Heroic Crafting feat rules by sneakily replacing them when they're placed on the actors.
 Hooks.on("createItem", async (item) => {
-    const sourceID = item.flags.core?.sourceId ?? "";
+    const sourceID = item.sourceId ?? "";
 
     if (sourceID in hardcodeRules) {
         if (hardcodeRules[sourceID].check(item)) {
