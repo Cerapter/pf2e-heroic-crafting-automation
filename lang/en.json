@@ -82,7 +82,7 @@
             "PayMethod": "Pay Method",
             "FullCoin": "Coins only",
             "PreferCoin": "Coins, then Troves",
-            "PreferTrove": "Troves, the coins",
+            "PreferTrove": "Troves, then coins",
             "FullTrove": "Material Troves only",
             "Free": "Free"
         },
