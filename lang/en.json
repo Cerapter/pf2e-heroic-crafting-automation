@@ -73,7 +73,7 @@
             "CancelButton": "Cancel"
         },
         "ProjectManagement": {
-            "CurrentProject": "Current Project:",
+            "CurrentProject": "Current Project",
             "RemainingMaterials": "Remaining Materials",
             "MaximumCost": "Maximum Cost",
             "OverspendingWarning": "OVERSPENDING!",

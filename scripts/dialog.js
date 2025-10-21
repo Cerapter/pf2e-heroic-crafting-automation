@@ -79,8 +79,8 @@ export async function projectBeginDialog(
     window: {
       title: localise("ProjectBeginWindow.Title"),
       icon: "fa-solid fa-fw fa-scroll",
-      position: { width: 350 },
     },
+    position: { width: 350 },
     content: `
                 <form>
                     <body>
@@ -115,7 +115,7 @@ export async function projectBeginDialog(
       {
         label: localise("ProjectBeginWindow.BeginProjectButton"),
         action: "begin-project",
-        icon: "<i class='fa-solid fa-hammer'></i>",
+        icon: "fa-solid fa-hammer",
         callback: (_event, _button, dialog) => {
           const html = dialog.element ? dialog.element : dialog;
           return {
@@ -129,7 +129,7 @@ export async function projectBeginDialog(
       {
         label: "Cancel",
         action: "cancel",
-        icon: "<i class='fa-solid fa-ban'></i>",
+        icon: "fa-solid fa-ban",
       },
     ],
     default: "begin-project",
@@ -252,6 +252,7 @@ export async function projectCraftDialog(actor, itemDetails) {
       title: localise("CraftWindow.Title"),
       icon: "fa-solid fa-hammer",
     },
+    position: { width: 350 },
     content: `
         <form>
                     <body>
@@ -541,8 +542,8 @@ export async function projectEditDialog(projectDetails) {
     window: {
       title: localise("EditProjectWindow.Title"),
       icon: "fa-solid fa-trowel",
-      position: { width: 350 },
     },
+    position: { width: 350 },
     content: `
         <form>
                     <body>
