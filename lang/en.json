@@ -43,7 +43,6 @@
                 "NoOvertime": "No overtime"
             },
             "CraftProjectButton": "Craft Project",
-            "CancelButton": "Cancel",
             "Progress": {
                 "SkipCheck": "<strong>{name}</strong> skips the Craft check for <strong>{itemName}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.",
                 "Progress": "<strong>{name}</strong> progresses on their <strong>{batchSize} x {itemName}</strong> project, by {progressAmount} (current: {currentProgress} out of {goal}).",
