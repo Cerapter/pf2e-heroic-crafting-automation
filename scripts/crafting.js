@@ -680,11 +680,11 @@ export async function progressProject(
                   project.progressInCopper / cost?.copperValue
                 }" max="1" data-tooltip="${Math.round(
           (project.progressInCopper / cost?.copperValue) * 100
-        )}% (▲ +${Math.round(
+        )}% (▲+${Math.round(
           (amount.copperValue / cost?.copperValue) * 100
         )}%)"></progress> ${Math.round(
           (project.progressInCopper / cost?.copperValue) * 100
-        )}% (▲ +${Math.round(
+        )}% (▲+${Math.round(
           (amount.copperValue / cost?.copperValue) * 100
         )}%)`,
         speaker: {
@@ -732,11 +732,11 @@ export async function progressProject(
                   project.progressInCopper / cost?.copperValue
                 }" max="1" data-tooltip="${Math.round(
           (project.progressInCopper / cost?.copperValue) * 100
-        )}% (▲ +${Math.round(
+        )}% (▲+${Math.round(
           (amount.copperValue / cost?.copperValue) * 100
         )}%)"></progress> ${Math.round(
           (project.progressInCopper / cost?.copperValue) * 100
-        )}% (▲ +${Math.round(
+        )}% (▲+${Math.round(
           (amount.copperValue / cost?.copperValue) * 100
         )}%)`,
         speaker: {
