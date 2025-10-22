@@ -100,6 +100,7 @@ export async function projectBeginDialog(
     )}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise(
       "ProjectManagement.OverspendingWarning"
     )}</strong></span>
+                            <progress id="remainingMaterialPercent" value="0" max="1"></progress> <label id="remainingMaterialPercentLabel"></label>
                         </section>
                     </body>
                     <div class="form-group">
@@ -176,6 +177,13 @@ export async function projectBeginDialog(
             form.find("[id=spanNotOverspending]").removeAttr("hidden");
             form.find("[id=spanOverspending]").attr("hidden", true);
           }
+
+          handleDialogProgressBar(
+            currentSpending,
+            maxCost,
+            form,
+            remainingSpending
+          );
         });
 
       content.querySelector("[id=maxCost]").innerHTML = maxCost;
@@ -272,6 +280,7 @@ export async function projectCraftDialog(actor, itemDetails) {
     )}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise(
       "ProjectManagement.OverspendingWarning"
     )}</strong></span>
+                            <progress id="remainingMaterialPercent" value="0" max="1" data-tooltip="0%"></progress> <label id="remainingMaterialPercentLabel"></label>
                         </section>
                     </body>
                     <div class="form-group">
@@ -442,6 +451,13 @@ export async function projectCraftDialog(actor, itemDetails) {
           for (let index = 0; index < craftModifierLabels.length; index++) {
             craftModifierLabels[index].dispatchEvent(new Event("change"));
           }
+
+          handleDialogProgressBar(
+            currentSpending,
+            maxCost,
+            form,
+            remainingSpending
+          );
         });
 
       const extraCraftModifierDivs = content.querySelectorAll(
@@ -670,4 +686,29 @@ export async function projectToChat(actor, projectUUID) {
     ),
     speaker: { alias: actor.name },
   });
+}
+
+function handleDialogProgressBar(
+  currentSpending,
+  maxCost,
+  form,
+  remainingSpending
+) {
+  const percentProgress = currentSpending?.copperValue / maxCost?.copperValue;
+  const progressBar = form[0].querySelector("[id=remainingMaterialPercent]");
+  const progressBarLabel = form[0].querySelector(
+    "[id=remainingMaterialPercentLabel]"
+  );
+  progressBar.value = percentProgress;
+  progressBar.setAttribute(
+    "data-tooltip",
+    `${Math.round(percentProgress * 100)}%`
+  );
+  progressBarLabel.innerText =
+    percentProgress > 1 ? "" : `${Math.round(percentProgress * 100)}%`;
+
+  const color =
+    percentProgress === 1 ? "cyan" : remainingSpending === null ? "red" : "";
+  progressBar.style.accentColor = color;
+  progressBarLabel.style.color = color;
 }
