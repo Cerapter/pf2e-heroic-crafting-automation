@@ -4,6 +4,7 @@ import { normaliseCoins, subtractCoins } from "./coins.js";
 import { getTroves, getTroveValue, changeTroveValue, payWithTroves } from "./trove.js";
 import { projectToChat } from "./dialog.js";
 import { hardcodeRules } from "./hardcoder.js";
+import { forageCraftingResources, refillMaterialTroves } from "./macros.js";
 //import { AddCraftProgressRuleElement } from "./rule-elements/add-craft-progress.js";
 
 /// Exposes the various functions and constants for usage in macros.
@@ -47,7 +48,9 @@ Hooks.once(
             getTroves,
             getTroveValue,
             changeTroveValue,
-            payWithTroves
+            payWithTroves,
+            forageCraftingResources,
+            refillMaterialTroves,
         };
 
         game.pf2e.RuleElements.custom.AddCraftProgress = (await import("./rule-elements/add-craft-progress.js")).AddCraftProgressRuleElement;
