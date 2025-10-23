@@ -40,8 +40,9 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
     const item = await fromUuid(itemDetails.UUID);
     const maxCost = game.pf2e.Coins.fromPrice(item.price, itemDetails.batchSize || 1).scale(0.5);
 
-    return await Dialog.wait({
-        title: localise("ProjectBeginWindow.Title"),
+    return await foundry.applications.api.DialogV2.wait({
+        window: { title: localise("ProjectBeginWindow.Title"), icon: "fa-solid fa-fw fa-scroll" },
+        position: { width: 350 },
         content: `
                 <form>
                     <body>
@@ -53,6 +54,7 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
                         </section>
                         <section>
                             ${localise("ProjectManagement.RemainingMaterials")} / ${localise("ProjectManagement.MaximumCost")}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise("ProjectManagement.OverspendingWarning")}</strong></span>
+                            <progress id="remainingMaterialPercent" value="0" max="1"></progress> <label id="remainingMaterialPercentLabel"></label>
                         </section>
                     </body>
                     <div class="form-group">
@@ -62,27 +64,31 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
                     ${await getPaymentOptionHTML(preferredPayMethod)}
                 </form>
             `,
-        buttons: {
-            ok: {
+        buttons: [
+            {
                 label: localise("ProjectBeginWindow.BeginProjectButton"),
-                icon: "<i class='fa-solid fa-hammer'></i>",
-                callback: (html) => {
+                action: "begin-project",
+                icon: "fa-solid fa-hammer",
+                callback: (_event, _button, dialog) => {
+                    const html = dialog.element ? dialog.element : dialog;
                     return {
                         startingProgress: game.pf2e.Coins.fromString($(html).find("#spendingAmount")[0].value).copperValue,
                         payMethod: $(html).find("#payMethod")[0].value
                     };
                 }
             },
-            cancel: {
-                label: localise("ProjectBeginWindow.CancelButton"),
-                icon: "<i class='fa-solid fa-ban'></i>",
+            {
+                label: "Cancel",
+                action: "cancel",
+                icon: "fa-solid fa-ban",
             }
-        },
-        default: "ok",
-        close: (html) => {
+        ],
+        default: "begin-project",
+        close: () => {
             return {};
         },
-        render: ([content]) => {
+        render: (_event, app) => {
+            const content = app.element ? app.element : app;
             content
                 .querySelector("[id=spendingAmount]")
                 .addEventListener("keyup", (event) => {
@@ -101,14 +107,14 @@ export async function projectBeginDialog(itemDetails, preferredPayMethod = "full
                         form.find("[id=spanNotOverspending]").removeAttr("hidden");
                         form.find("[id=spanOverspending]").attr("hidden", true);
                     }
+
+                    handleDialogProgressBar(currentSpending, maxCost, form, remainingSpending);
                 });
 
-            content
-                .querySelector("[id=maxCost]").innerHTML = maxCost;
-            content
-                .querySelector("[id=remainingMaterials]").innerHTML = maxCost;
+            content.querySelector("[id=maxCost]").innerHTML = maxCost;
+            content.querySelector("[id=remainingMaterials]").innerHTML = maxCost;
         },
-    }, { width: 350 });
+    });
 }
 
 /**
@@ -174,8 +180,9 @@ export async function projectCraftDialog(actor, itemDetails) {
         extraHTML.unshift(`<hr>`);
     }
 
-    return await Dialog.wait({
-        title: localise("CraftWindow.Title"),
+    return await foundry.applications.api.DialogV2.wait({
+        window: { title: localise("CraftWindow.Title"), icon: "fa-solid fa-hammer" },
+        position: { width: 350 },
         content: `
         <form>
                     <body>
@@ -187,6 +194,7 @@ export async function projectCraftDialog(actor, itemDetails) {
                         </section>
                         <section>
                         ${localise("ProjectManagement.RemainingMaterials")} / ${localise("ProjectManagement.MaximumCost")}: <span id="spanNotOverspending"><strong id="remainingMaterials">0 gp</strong> / <strong id="maxCost">0 gp</strong></span><span id="spanOverspending" hidden><strong style="color: red">${localise("ProjectManagement.OverspendingWarning")}</strong></span>
+                            <progress id="remainingMaterialPercent" value="0" max="1" data-tooltip="0%"></progress> <label id="remainingMaterialPercentLabel"></label>
                         </section>
                     </body>
                     <div class="form-group">
@@ -213,11 +221,13 @@ export async function projectCraftDialog(actor, itemDetails) {
                     ${extraHTML.join('\n')}
                 </form>
         `,
-        buttons: {
-            ok: {
+        buttons: [
+            {
                 label: localise("CraftWindow.CraftProjectButton"),
-                icon: "<i class='fa-solid fa-hammer'></i>",
-                callback: (html) => {
+                action: "craft-project",
+                icon: "fa-solid fa-hammer",
+                callback: (_event, _button, dialog) => {
+                    const html = dialog.element ? dialog.element : dialog;
                     const toggles = {};
 
                     $(html).find(".extra-craft-modifiers input").each(function () {
@@ -239,21 +249,23 @@ export async function projectCraftDialog(actor, itemDetails) {
                     };
                 }
             },
-            cancel: {
-                label: localise("CraftWindow.CancelButton"),
-                icon: "<i class='fa-solid fa-ban'></i>",
+            {
+                label: "Cancel",
+                action: "cancel",
+                icon: "fa-solid fa-ban",
                 callback: (html) => {
                     return {};
                 }
             }
-        },
-        default: "ok",
+        ],
+        default: "craft-project",
         close: (html) => {
             actor.synthetics["CraftingOption"] = [];
             actor.synthetics["ModifyCraftAProject"] = [];
             return {};
         },
-        render: ([content]) => {
+        render: (_event, app) => {
+            const content = app.element ? app.element : app;
             content
                 .querySelector("[id=craftDuration]")
                 .addEventListener("change", (event) => {
@@ -295,6 +307,8 @@ export async function projectCraftDialog(actor, itemDetails) {
                         craftModifierLabels[index].dispatchEvent(new Event("change"));
 
                     }
+
+                    handleDialogProgressBar(currentSpending, maxCost, form, remainingSpending);
                 });
 
             const extraCraftModifierDivs = content
@@ -360,8 +374,9 @@ export async function projectEditDialog(projectDetails) {
     const item = await fromUuid(projectDetails.ItemUUID);
 
 
-    return await Dialog.wait({
-        title: localise("EditProjectWindow.Title"),
+    return await foundry.applications.api.DialogV2.wait({
+        window: { title: localise("EditProjectWindow.Title"), icon: "fa-solid fa-trowel" },
+        position: { width: 350 },
         content: `
         <form>
                     <body>
@@ -386,12 +401,13 @@ export async function projectEditDialog(projectDetails) {
                     </div>
                 </form>
         `,
-        buttons: {
-            ok: {
+        buttons: [
+            {
                 label: localise("EditProjectWindow.ConfirmChangesButton"),
-                icon: "<i class='fas fa-edit fa-1x fa-fw'></i>",
-                callback: (html) => {
-
+                action: "confirm-changes",
+                icon: "fas fa-edit fa-1x fa-fw",
+                callback: (_event, _button, dialog) => {
+                    const html = dialog.element ? dialog.element : dialog;
                     return {
                         progressInCopper: game.pf2e.Coins.fromString($(html).find("#currentProgress")[0].value).copperValue || -1,
                         DC: Number($(html).find("#DC")[0].value) || -1,
@@ -399,20 +415,21 @@ export async function projectEditDialog(projectDetails) {
                     };
                 }
             },
-            cancel: {
-                label: localise("EditProjectWindow.CancelButton"),
-                icon: "<i class='fa-solid fa-ban'></i>",
+            {
+                label: "Cancel",
+                action: "cancel",
+                icon: "fa-solid fa-ban",
             }
-        },
-        default: "ok",
-        close: (html) => {
+        ],
+        default: "confirm-changes",
+        close: () => {
             return {
                 progressInCopper: projectDetails.progressInCopper,
                 DC: projectDetails.DC,
                 batchSize: projectDetails.batchSize
             };
         }
-    }, { width: 350 });
+    });
 }
 
 /**
@@ -458,4 +475,17 @@ export async function projectToChat(actor, projectUUID) {
         content: await renderTemplate(`modules/${MODULE_NAME}/templates/project-card.hbs`, projectDetails),
         speaker: { alias: actor.name },
     });
+}
+
+function handleDialogProgressBar(currentSpending, maxCost, form, remainingSpending) {
+    const percentProgress = currentSpending?.copperValue / maxCost?.copperValue;
+    const progressBar = form[0].querySelector("[id=remainingMaterialPercent]");
+    const progressBarLabel = form[0].querySelector("[id=remainingMaterialPercentLabel]");
+    progressBar.value = percentProgress;
+    progressBar.setAttribute("data-tooltip", `${Math.round(percentProgress * 100)}%`);
+    progressBarLabel.innerText = percentProgress > 1 ? "" : `${Math.round(percentProgress * 100)}%`;
+
+    const color = percentProgress === 1 ? "cyan" : remainingSpending === null ? "red" : "";
+    progressBar.style.accentColor = color;
+    progressBarLabel.style.color = color;
 }

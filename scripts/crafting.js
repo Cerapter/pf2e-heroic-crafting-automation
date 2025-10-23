@@ -509,14 +509,15 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         } else {
             ChatMessage.create({
                 user: game.user.id,
-                content: localise("CraftWindow.Progress.Progress", {
+                content: `${localise("CraftWindow.Progress.Progress", {
                     name: crafterActor.name,
                     batchSize: project.batchSize,
                     itemName: projectItem.name,
                     progressAmount: amount.toString(),
                     currentProgress: normaliseCoins(project.progressInCopper),
                     goal: cost.toString()
-                }),
+                })}
+                <progress id="remainingMaterialPercent" value="${project.progressInCopper / cost?.copperValue}" max="1" data-tooltip="${Math.round((project.progressInCopper / cost?.copperValue) * 100)}% (▲+${Math.round((amount.copperValue / cost?.copperValue) * 100)}%)"></progress> ${Math.round((project.progressInCopper / cost?.copperValue) * 100)}% (▲+${Math.round((amount.copperValue / cost?.copperValue) * 100)}%)`,
                 speaker: { alias: crafterActor.name },
             });
             await crafterActor.update({
@@ -542,14 +543,15 @@ export async function progressProject(crafterActor, projectUUID, hasProgressed, 
         } else {
             ChatMessage.create({
                 user: game.user.id,
-                content: localise("CraftWindow.Progress.Progress", {
+                content: `${localise("CraftWindow.Progress.Progress", {
                     name: crafterActor.name,
                     batchSize: project.batchSize,
                     itemName: projectItem.name,
                     progressAmount: amount.toString(),
                     currentProgress: normaliseCoins(project.progressInCopper),
                     goal: cost.toString()
-                }),
+                })}
+                <progress id="remainingMaterialPercent" value="${project.progressInCopper / cost?.copperValue}" max="1" data-tooltip="${Math.round((project.progressInCopper / cost?.copperValue) * 100)}% (▲+${Math.round((amount.copperValue / cost?.copperValue) * 100)}%)"></progress> ${Math.round((project.progressInCopper / cost?.copperValue) * 100)}% (▲+${Math.round((amount.copperValue / cost?.copperValue) * 100)}%)`,
                 speaker: { alias: crafterActor.name },
             });
             await crafterActor.update({

@@ -43,11 +43,10 @@
                 "NoOvertime": "No overtime"
             },
             "CraftProjectButton": "Craft Project",
-            "CancelButton": "Cancel",
             "Progress": {
                 "SkipCheck": "<strong>{name}</strong> skips the Craft check for <strong>{itemName}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.",
-                "Progress": "<strong>{name}</strong> progresses on their <strong>{batchSize} x {itemName}</strong> project, by {progressAmount} (current: {currentProgress} out of {goal}).",
-                "Setback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, losing {progressAmount} of progress (current: {currentProgress} out of {goal}).",
+                "Progress": "<strong>{name}</strong> progresses on their <strong>{batchSize} x {itemName}</strong> project, by {progressAmount} (<strong>{currentProgress}</strong> out of <strong>{goal}</strong>).",
+                "Setback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, losing {progressAmount} of progress (<strong>{currentProgress}</strong> out of <strong>{goal}</strong>).",
                 "FatalSetback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, completely ruining it.",
                 "Finish": "<strong>{name}</strong> finishes their <strong>{batchSize} x {itemName}</strong> project, gaining the aforementioned item(s).",
                 "LacksPermissionToFinish": "<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to {name}, as {playerName} does not have permissions to edit said actor."
@@ -74,7 +73,7 @@
             "CancelButton": "Cancel"
         },
         "ProjectManagement": {
-            "CurrentProject": "Current Project:",
+            "CurrentProject": "Current Project",
             "RemainingMaterials": "Remaining Materials",
             "MaximumCost": "Maximum Cost",
             "OverspendingWarning": "OVERSPENDING!",
