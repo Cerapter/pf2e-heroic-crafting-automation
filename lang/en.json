@@ -43,11 +43,10 @@
                 "NoOvertime": "No overtime"
             },
             "CraftProjectButton": "Craft Project",
-            "CancelButton": "Cancel",
             "Progress": {
                 "SkipCheck": "<strong>{name}</strong> skips the Craft check for <strong>{itemName}</strong> as the difference between your project's Current Value and its Price is less than the activity's maximum Cost.",
-                "Progress": "<strong>{name}</strong> progresses on their <strong>{batchSize} x {itemName}</strong> project, by {progressAmount} (current: {currentProgress} out of {goal}).",
-                "Setback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, losing {progressAmount} of progress (current: {currentProgress} out of {goal}).",
+                "Progress": "<strong>{name}</strong> progresses on their <strong>{batchSize} x {itemName}</strong> project, by {progressAmount} (<strong>{currentProgress}</strong> out of <strong>{goal}</strong>).",
+                "Setback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, losing {progressAmount} of progress (<strong>{currentProgress}</strong> out of <strong>{goal}</strong>).",
                 "FatalSetback": "<strong>{name}</strong> experiences setback on their <strong>{batchSize} x {itemName}</strong> project, completely ruining it.",
                 "Finish": "<strong>{name}</strong> finishes their <strong>{batchSize} x {itemName}</strong> project, gaining the aforementioned item(s).",
                 "LacksPermissionToFinish": "<hr><strong>Foundry Note</strong> Due to permission restrictions, you have to manually add this item to {name}, as {playerName} does not have permissions to edit said actor."
@@ -74,7 +73,7 @@
             "CancelButton": "Cancel"
         },
         "ProjectManagement": {
-            "CurrentProject": "Current Project:",
+            "CurrentProject": "Current Project",
             "RemainingMaterials": "Remaining Materials",
             "MaximumCost": "Maximum Cost",
             "OverspendingWarning": "OVERSPENDING!",
@@ -103,6 +102,34 @@
         "CraftingResult": {
             "Progress": "Progress project's Current Value by {progress}",
             "Deduct": "Deduct {progress} from project's Current Value"
+        },
+       "ForageCraftingResources": {
+            "Title": "Forage Crafting Resources",
+            "Forage": "Forage",
+            "TaskLevel": "Task Level",
+            "DC": "DC",
+            "NoteSuccess": "Add the amount listed on Table 2: Gathered Income for the location's level to your Material Trove each day. If you are a master in Survival, instead add twice as much.",
+            "NoteFailure": "You find no materials.",
+            "VigilantForager": "Vigilant Forager (after 8 hours or less)",
+            "GeneralSummary": "You find <strong>{amt}</strong> worth of materials. You can use the @UUID[Compendium.pf2e-heroic-crafting-automation.heroic-crafting-automation-macros.Macro.wtYkY4Kay4dZ3HT6] macro to add this value to your Material Troves."
+        },
+        "RefillMaterialTroves": {
+            "Title": "Refill Material Troves",
+            "Refill": "Refill",
+            "Description": {
+                "AdjustValues": "Adjust the values of your Material Troves to fill them up. Their Bulk should change as you do so.",
+                "AdjustLevels": "You can adjust the level of your Material Troves up to your level. Higher level Material Troves contain more value in the same Bulk.",
+                "ManualCoins": "You must manually adjust any changes in your coins."
+            },
+            "Leftover": "Leftover",
+            "LeftoverDescription": "The Leftover column indicates value that cannot be represented with Bulk changes, but is still part of the Material Trove. As an example, if you Forage Crafting Resources for 1 day in a level 0 location, you would add 1 sp to your Material Trove -- but no Material Trove can actually represent that with a change in Bulk. This will still be accounted for, but will not show on the item."
+        },
+        "Warning": {
+            "SelectToken": "Please select a token!"
+        },
+        "General": {
+            "FoundryNote": "<strong>Foundry Note</strong>",
+            "Note": "<strong>Note</strong>"
         }
     },
     "PF2E": {
