@@ -4,7 +4,7 @@
 	"author": "BRial3lkTUItF0fP",
 	"img": "icons/skills/trades/mining-pickaxe-stone-cart.webp",
 	"scope": "global",
-	"command": "game.pf2eHeroicCrafting.refillMaterialTroves()",
+	"command": "game.pf2eHeroicCrafting.refillMaterialTroves(token);",
 	"flags": {
 		"core": {
 			"sourceId": "Compendium.pf2e-heroic-crafting-automation.heroic-crafting-automation-macros.Item.wtYkY4Kay4dZ3HT6"

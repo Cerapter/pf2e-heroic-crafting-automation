@@ -4,7 +4,7 @@
 	"author": "BRial3lkTUItF0fP",
 	"img": "icons/commodities/flowers/flower-green.webp",
 	"scope": "global",
-	"command": "// Editable values (or at least, ones I suggest):\n\nconst skillName = \"survival\";\nconst rawTraits = [\"downtime\"];\nconst actionName = \"Forage Crafting Resources\";\n\n// End of editable values\n\ngame.pf2eHeroicCrafting.forageCraftingResources({skillName, rawTraits, actionName})",
+	"command": "// Editable values (or at least, ones I suggest):\n\nconst skillName = \"survival\";\nconst rawTraits = [\"downtime\"];\nconst actionName = \"Forage Crafting Resources\";\n\n// End of editable values\n\ngame.pf2eHeroicCrafting.forageCraftingResources({token, skillName, rawTraits, actionName});",
 	"flags": {
 		"core": {
 			"sourceId": "Compendium.pf2e-heroic-crafting-automation.heroic-crafting-automation-macros.Item.ygPS9KQ4kgZEwpFY"

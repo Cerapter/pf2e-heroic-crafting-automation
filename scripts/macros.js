@@ -1,6 +1,7 @@
 import { localise } from "./constants.js";
 
 export async function forageCraftingResources({
+  token,
   skillName,
   rawTraits,
   actionName,
@@ -65,7 +66,7 @@ export async function forageCraftingResources({
   const traits = [];
   const extraRollNotes = [];
 
-  const statistic = actor.getStatistic(skillName);
+  const statistic = token.actor.getStatistic(skillName);
   const harvestSkillCheck = statistic.extend({
     check: {
       label: `${actionName}`,
@@ -74,7 +75,7 @@ export async function forageCraftingResources({
     rollOptions: [`action:forage`],
     slug: "action-forage-harvesting-resources",
   });
-  const actorRollOptions = actor.getRollOptions();
+  const actorRollOptions = token.actor.getRollOptions();
 
   const baseGatheredIncome = game.pf2e.Coins.fromString(
     game.pf2eHeroicCrafting.HeroicCraftingGatheredIncome[dialogResults.level]
@@ -86,13 +87,13 @@ export async function forageCraftingResources({
 
     extraRollNotes.push({
       outcome: ["success", "criticalSuccess"],
-      text: `<p>${game.i18n.localise("PF2E.Success")} ${localise(
+      text: `<p>${game.i18n.localize("PF2E.Success")} ${localise(
         "ForageCraftingResources.NoteSuccess"
       )}`,
     });
     extraRollNotes.push({
       outcome: ["failure", "criticalFailure"],
-      text: `<p>${game.i18n.localise("PF2E.Failure")} ${localise(
+      text: `<p>${game.i18n.localize("PF2E.Failure")} ${localise(
         "ForageCraftingResources.NoteFailure"
       )}`,
     });
@@ -172,7 +173,7 @@ export async function forageCraftingResources({
   });
 }
 
-export async function refillMaterialTroves() {
+export async function refillMaterialTroves(token) {
     if (!token) {
         ui.notifications.warn(localise("Warning.SelectToken"));
         return;
@@ -243,10 +244,10 @@ export async function refillMaterialTroves() {
                     </body>
                     <hr/>
                     <div class="form-group">
-                        <strong>${game.i18n.localise("PF2E.NameLabel")}</strong>
-                        <strong>${game.i18n.localise("PF2E.LevelLabel")}</strong>
-                        <strong style='margin-right: 20px; margin-left: 20px'>${game.i18n.localise("PF2E.ValueLabel")}</strong>
-                        <strong>${game.i18n.localise("PF2E.Item.Physical.Bulk.Label")}</strong>
+                        <strong>${game.i18n.localize("PF2E.Item.NameLabel")}</strong>
+                        <strong>${game.i18n.localize("PF2E.LevelLabel")}</strong>
+                        <strong style='margin-right: 20px; margin-left: 20px'>${game.i18n.localize("PF2E.ValueLabel")}</strong>
+                        <strong>${game.i18n.localize("PF2E.Item.Physical.Bulk.Label")}</strong>
                         <strong>${localise("RefillMaterialTroves.Leftover")}</strong>
                     </div>
                     <hr/>
